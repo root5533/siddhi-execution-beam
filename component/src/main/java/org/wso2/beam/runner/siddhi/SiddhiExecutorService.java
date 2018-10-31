@@ -1,11 +1,14 @@
 package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.sdk.runners.AppliedPTransform;
+import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class SiddhiExecutorService {
 
@@ -42,7 +45,16 @@ public class SiddhiExecutorService {
             /*
             Emit elements to SiddhiApp
              */
-
+            for (Iterator iter = context.getRootBundles().iterator(); iter.hasNext(); ) {
+                CommittedBundle<SourceWrapper> rootBundle = (CommittedBundle<SourceWrapper>) iter.next();
+                SourceWrapper source = rootBundle.getSourceWrapper();
+                PCollection pCol = rootBundle.getPCollection();
+                List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
+                AppliedPTransform<?, ?, ?> startTransform = transforms.get(0);
+                context.setStartTransform(startTransform);
+                source.open();
+                source.run(executionRuntime.getInputHandler("inputStream"), pCol);
+            }
 
             LOG.info("Siddhi Runner Complete");
         } catch (Exception e) {

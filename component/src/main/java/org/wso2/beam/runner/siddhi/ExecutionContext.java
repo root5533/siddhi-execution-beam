@@ -1,5 +1,6 @@
 package org.wso2.beam.runner.siddhi;
 
+import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.PCollection;
 
@@ -12,6 +13,7 @@ public class ExecutionContext {
     private HashMap<PCollection, CommittedBundle> rootBundles = new HashMap<>();
     private Iterator rootBundlesIterator;
     private static final ExecutionContext context = new ExecutionContext();
+    private AppliedPTransform startTransform;
 
     private ExecutionContext() {}
 
@@ -66,6 +68,14 @@ public class ExecutionContext {
             }
         }
         return null;
+    }
+
+    public void setStartTransform(AppliedPTransform transform) {
+        this.startTransform = transform;
+    }
+
+    public AppliedPTransform getStartTransform() {
+        return this.startTransform;
     }
 
 }

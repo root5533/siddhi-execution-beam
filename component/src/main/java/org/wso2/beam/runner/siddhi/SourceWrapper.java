@@ -4,12 +4,17 @@ import org.apache.beam.sdk.io.BoundedSource;
 import org.apache.beam.sdk.io.BoundedSource.BoundedReader;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.util.WindowedValue;
+import org.apache.beam.sdk.values.PCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wso2.siddhi.core.stream.input.InputHandler;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class SourceWrapper<OutputT> {
 
+    private static final Logger LOG = LoggerFactory.getLogger(SourceWrapper.class);
     List<? extends BoundedSource<OutputT>> splitSources;
     private boolean isOpen = false;
     PipelineOptions options;
@@ -62,6 +67,32 @@ public class SourceWrapper<OutputT> {
     private void emitElement(DoFnOperator op, BoundedReader reader) {
         WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
         op.processElement(elem);
+    }
+
+    public void run(InputHandler inputHandler, PCollection pCol) throws Exception {
+
+        /**
+         *Run the source to emit each element to DoFnOperator delegate
+         */
+        if (this.localReaders.size() == 1) {
+            BoundedReader<OutputT> reader = localReaders.get(0);
+            boolean hasData = reader.start();
+            if (hasData) {
+                this.emitElement(inputHandler, reader, pCol);
+            }
+            hasData = reader.advance();
+            while (hasData) {
+                this.emitElement(inputHandler, reader, pCol);
+                hasData = reader.advance();
+            }
+        }
+
+    }
+
+    private void emitElement (InputHandler inputHandler, BoundedReader reader, PCollection pCol) throws Exception {
+        WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
+        CustomEvent event = CustomEvent.create(elem, pCol);
+        inputHandler.send(new Object[]{event});
     }
 
 }

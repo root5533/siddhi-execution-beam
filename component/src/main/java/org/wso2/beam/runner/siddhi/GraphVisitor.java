@@ -28,17 +28,17 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
 
     public CompositeBehavior enterCompositeTransform(Node node) {
         ++this.depth;
-        LOG.info("{} enterCompositeTransform- {}", genSpaces(this.depth), node.getFullName());
+//        LOG.info("{} enterCompositeTransform- {}", genSpaces(this.depth), node.getFullName());
         return CompositeBehavior.ENTER_TRANSFORM;
     }
 
     public void leaveCompositeTransform(Node node) {
         --this.depth;
-        LOG.info("{} leaveCompositeTransform- {}", genSpaces(this.depth), node.getFullName());
+//        LOG.info("{} leaveCompositeTransform- {}", genSpaces(this.depth), node.getFullName());
     }
 
     public void visitPrimitiveTransform(Node node) {
-        LOG.info("{} visitPrimitiveTransform- {}", genSpaces(this.depth), node.getFullName());
+//        LOG.info("{} visitPrimitiveTransform- {}", genSpaces(this.depth), node.getFullName());
 
         AppliedPTransform<?, ?, ?> appliedPTransform = this.getAppliedTransform(node);
         this.stepNames.put(appliedPTransform, this.genStepName());
@@ -49,7 +49,7 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
         } else {
             Collection<PValue> mainInputs = TransformInputs.nonAdditionalInputs(node.toAppliedPTransform(this.getPipeline()));
             if (!mainInputs.containsAll(node.getInputs().values())) {
-                LOG.info("Inputs reduced to {} from {} by removing additional inputs", mainInputs, node.getInputs().values());
+//                LOG.info("Inputs reduced to {} from {} by removing additional inputs", mainInputs, node.getInputs().values());
             }
             Iterator iter = mainInputs.iterator();
             PValue value;
@@ -66,7 +66,7 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
     }
 
     public void visitValue(PValue value, Node node) {
-        LOG.info("{} visitValue- {}", genSpaces(this.depth), node.getFullName());
+//        LOG.info("{} visitValue- {}", genSpaces(this.depth), node.getFullName());
         AppliedPTransform<?, ?, ?> appliedTransform = this.getAppliedTransform(node);
         if (value instanceof PCollection && !this.producers.containsKey(value)) {
             this.producers.put((PCollection)value, appliedTransform);
@@ -74,12 +74,12 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
     }
 
     private AppliedPTransform<?, ?, ?> getAppliedTransform(Node node) {
-        LOG.info("{} getAppliedTransform- {}", genSpaces(this.depth), node.getFullName());
+//        LOG.info("{} getAppliedTransform- {}", genSpaces(this.depth), node.getFullName());
         return node.toAppliedPTransform(this.getPipeline());
     }
 
     public DirectGraph getGraph() {
-        LOG.info("{} getGraph- {}", genSpaces(this.depth));
+//        LOG.info("{} getGraph- {}", genSpaces(this.depth));
         return DirectGraph.create(producers, perElementConsumers, rootTransforms, stepNames);
     }
 
