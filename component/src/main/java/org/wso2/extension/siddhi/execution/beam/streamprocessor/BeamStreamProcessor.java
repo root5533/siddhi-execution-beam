@@ -87,15 +87,15 @@ public class BeamStreamProcessor  extends StreamProcessor {
                 if (event.getOutputData()[0] instanceof CustomEvent) {
                     CustomEvent value = (CustomEvent) event.getOutputData()[0];
                     LOG.info("Processing event : " + value.getElement().getValue().toString());
-                    SiddhiTransformExecutor.process(value);
+                    SiddhiTransformExecutor.process(value, complexEventChunk);
                 } else {
-                    throw new SiddhiAppCreationException("Event should be of type WindowedValue");
+                    throw new SiddhiAppCreationException("Event should be of type CustomEvent");
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        nextProcessor.process(complexEventChunk);
     }
 
     /**

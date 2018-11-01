@@ -43,8 +43,8 @@ public class SimpleLocalRunnerService {
             CommittedBundle<SourceWrapper> rootBundle = context.getPendingRootBundle();
             List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
             AppliedPTransform<?, ?, ?> pardoTransform = transforms.get(0);
-            PardoEvaluator evaluator = new PardoEvaluator(pardoTransform, rootBundle, context);
-            evaluator.execute();
+//            PardoEvaluator evaluator = new PardoEvaluator(pardoTransform, rootBundle, context);
+//            evaluator.execute();
 
             /**
              * Execute WriteFile

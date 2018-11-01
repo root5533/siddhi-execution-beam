@@ -14,6 +14,9 @@ import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionView;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.WindowingStrategy;
+import org.wso2.siddhi.core.event.ComplexEventChunk;
+import org.wso2.siddhi.core.event.Event;
+import org.wso2.siddhi.core.event.stream.StreamEvent;
 
 import java.util.Iterator;
 import java.util.List;
@@ -23,16 +26,16 @@ import java.util.stream.Collectors;
 public class DoFnOperator<InputT, OutputT> {
 
     private final AppliedPTransform<?, ?, ?> transform;
-    private final ExecutionContext context;
     private DoFnRunner<InputT, OutputT> delegate;
-    private CommittedBundle<WindowedValue<?>> outputBundle;
+//    private CommittedBundle<WindowedValue<?>> outputBundle;
+    private ComplexEventChunk<StreamEvent> complexEventChunk;
 
-    public DoFnOperator(AppliedPTransform transform, ExecutionContext context) {
+    public DoFnOperator(AppliedPTransform transform, ComplexEventChunk<StreamEvent> complexEventChunk) {
         this.transform = transform;
-        this.context = context;
+        this.complexEventChunk = complexEventChunk;
     }
 
-    public void createRunner(CommittedBundle bundle) throws Exception {
+    public void createRunner(CustomEvent event) throws Exception {
         PipelineOptions options = this.transform.getPipeline().getOptions();
         DoFn<InputT, OutputT> fn = ((ParDo.MultiOutput) this.transform.getTransform()).getFn();
         SideInputReader sideInputReader = DoFnOperator.LocalSideInputReader.create(ParDoTranslation.getSideInputs(this.transform));
@@ -40,21 +43,21 @@ public class DoFnOperator<InputT, OutputT> {
         TupleTag<OutputT> mainOutputTag = (TupleTag<OutputT>) ParDoTranslation.getMainOutputTag(this.transform);
         List<TupleTag<?>> additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
         StepContext stepContext = DoFnOperator.LocalStepContext.create();
-        Coder<InputT> inputCoder = bundle.getPCollection().getCoder();
+        Coder<InputT> inputCoder = event.getPCollection().getCoder();
         Map<TupleTag<?>, Coder<?>> outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
             return (TupleTag)e.getKey();
         }, (e) -> {
             return ((PCollection)e.getValue()).getCoder();
         }));
-        WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy = bundle.getPCollection().getWindowingStrategy();
+        WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy = event.getPCollection().getWindowingStrategy();
         this.delegate = new SimpleDoFnRunner(options, fn, sideInputReader, outputManager, mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);
 
         /**
          * Create Committed Bundle for output(expecting only 1)
          */
-        for (Iterator iter = this.transform.getOutputs().values().iterator(); iter.hasNext();) {
-            this.outputBundle = new CommittedBundle((PCollection) iter.next());
-        }
+//        for (Iterator iter = this.transform.getOutputs().values().iterator(); iter.hasNext();) {
+//            this.outputBundle = new CommittedBundle((PCollection) iter.next());
+//        }
 
     }
 
@@ -63,12 +66,10 @@ public class DoFnOperator<InputT, OutputT> {
     }
 
     public void finish() {
-        this.context.addOutputBundle(outputBundle);
         this.delegate.finishBundle();
     }
 
     public void processElement(WindowedValue<InputT> element) {
-        System.out.println("DoFnOperator : processElement() : " + element.getValue().toString());
         try {
             this.delegate.processElement(element);
         } catch (Exception e) {
@@ -80,8 +81,10 @@ public class DoFnOperator<InputT, OutputT> {
 
         @Override
         public <T> void output(TupleTag<T> tag, WindowedValue<T> output) {
-            System.out.println("DoFnOperator : BundleOutputManager : output() : " + output.getValue().toString());
-            DoFnOperator.this.outputBundle.addItem(output);
+            StreamEvent event = new StreamEvent(0,0,1);
+            Object[] object = {output};
+            event.setOutputData(object);
+            DoFnOperator.this.complexEventChunk.add(event);
         }
     }
 
@@ -124,7 +127,6 @@ public class DoFnOperator<InputT, OutputT> {
 
         @Override
         public boolean isEmpty() {
-            System.out.println("DoFnOperator : LocalSideInputReader : isEmpty()");
             return false;
         }
     }
