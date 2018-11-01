@@ -86,8 +86,9 @@ public class BeamStreamProcessor  extends StreamProcessor {
                 StreamEvent event = streamEventChunk.next();
                 if (event.getOutputData()[0] instanceof CustomEvent) {
                     CustomEvent value = (CustomEvent) event.getOutputData()[0];
-                    LOG.info("Processing event : " + value.getElement().getValue().toString());
-                    SiddhiTransformExecutor.process(value, complexEventChunk);
+                    if (value.getElement().getValue() != null) {
+                        SiddhiTransformExecutor.process(value, complexEventChunk);
+                    }
                 } else {
                     throw new SiddhiAppCreationException("Event should be of type CustomEvent");
                 }
@@ -109,18 +110,7 @@ public class BeamStreamProcessor  extends StreamProcessor {
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                    SiddhiAppContext siddhiAppContext) {
-        List<Attribute> attributes = new ArrayList<>();
-        if  (attributeExpressionLength > 1) {
-            throw new SiddhiAppCreationException("Only one input parameter is allowed");
-        }
-
-        if (attributeExpressionExecutors.length == 1) {
-            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
-                attributes.add(new Attribute("obj", Attribute.Type.OBJECT));
-            }
-        }
-
-        return attributes;
+        return new ArrayList<>();
     }
 
     /**

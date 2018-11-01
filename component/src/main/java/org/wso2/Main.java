@@ -21,7 +21,7 @@ public class Main {
         void setInputFile(String value);
 
         @Description("Set output target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/output")
+        @Default.String("/Users/admin/Projects/siddhi-execution-beam/outputs/result")
         String getOutput();
         void setOutput(String value);
     }

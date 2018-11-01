@@ -15,7 +15,7 @@ public class PardoEvaluator {
     }
 
     public void execute(ComplexEventChunk<StreamEvent> complexEventChunk) throws Exception {
-        DoFnOperator operator = new DoFnOperator(this.pardo, complexEventChunk);
+        SiddhiDoFnOperator operator = new SiddhiDoFnOperator(this.pardo, complexEventChunk);
         operator.createRunner(this.event);
         operator.start();
         operator.processElement(this.event.getElement());

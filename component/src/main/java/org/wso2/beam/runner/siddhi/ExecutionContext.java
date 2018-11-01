@@ -13,7 +13,7 @@ public class ExecutionContext {
     private HashMap<PCollection, CommittedBundle> rootBundles = new HashMap<>();
     private Iterator rootBundlesIterator;
     private static final ExecutionContext context = new ExecutionContext();
-    private AppliedPTransform startTransform;
+    private AppliedPTransform currentTransform;
 
     private ExecutionContext() {}
 
@@ -71,11 +71,11 @@ public class ExecutionContext {
     }
 
     public void setStartTransform(AppliedPTransform transform) {
-        this.startTransform = transform;
+        this.currentTransform = transform;
     }
 
     public AppliedPTransform getStartTransform() {
-        return this.startTransform;
+        return this.currentTransform;
     }
 
 }

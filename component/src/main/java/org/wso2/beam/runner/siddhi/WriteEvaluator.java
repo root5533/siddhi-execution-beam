@@ -18,17 +18,13 @@ public class WriteEvaluator<InputT> {
     }
 
     public void execute() throws Exception {
-//        DoFnOperator operator = new DoFnOperator(this.sink, this.context);
-//        operator.createRunner(this.bundle);
-//        operator.start();
-//        for (Iterator iter = this.bundle.getValues().iterator(); iter.hasNext(); ) {
-//            operator.processElement( (WindowedValue<InputT>) iter.next() );
-//        }
-//        operator.finish();
-    }
-
-    public void finish(AppliedPTransform finalize) {
-
+        DoFnOperator operator = new DoFnOperator(this.sink, this.context);
+        operator.createRunner(this.bundle);
+        operator.start();
+        for (Iterator iter = this.bundle.getValues().iterator(); iter.hasNext(); ) {
+            operator.processElement( (WindowedValue<InputT>) iter.next() );
+        }
+        operator.finish();
     }
 
 }
