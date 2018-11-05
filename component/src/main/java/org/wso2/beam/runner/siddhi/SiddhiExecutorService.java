@@ -3,6 +3,7 @@ package org.wso2.beam.runner.siddhi;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
@@ -42,6 +43,7 @@ public class SiddhiExecutorService {
             Create SiddhiAppRuntime
              */
             SiddhiApp executionRuntime = new SiddhiApp();
+
             /*
             Emit elements to SiddhiApp
              */
@@ -60,37 +62,34 @@ public class SiddhiExecutorService {
                 source.open();
                 source.run(executionRuntime.getSiddhiRuntime().getInputHandler("inputStream"), key);
 
-                for (Iterator iter = context.getStartTransform().getOutputs().values().iterator(); iter.hasNext(); ) {
-                    key = (PCollection) iter.next();
-                }
+                /*
+                Finalize output WriteFile
+                 */
 
                 CommittedBundle bundle = executionRuntime.getBundle();
+                bundle.setPCollection(context.getFinalCollection());
                 if (bundle.getValues().peek() != null) {
-                    AppliedPTransform<?, ?, ?> writeTransform = null;
-                    if (key != null) {
-                        transforms = graph.getPerElementConsumers(bundle.getPCollection());
-                        writeTransform = transforms.get(0);
-                        PCollection col = (PCollection) writeTransform.getOutputs().values().toArray()[0];
-                        transforms = graph.getPerElementConsumers(col);
-                        writeTransform = transforms.get(0);
-                        if (writeTransform != null) {
-                            WriteEvaluator eval = new WriteEvaluator(writeTransform, bundle, context);
-                            eval.execute();
-                        }
-                    }
-
                     for (Iterator iter = graph.getAllPerElementConsumers().asMap().values().iterator(); iter.hasNext(); ) {
                         List transformList = (List) iter.next();
                         AppliedPTransform transform = (AppliedPTransform) transformList.get(0);
-                        if (transform.getFullName().equals("Writefile/WriteFiles/FinalizeTempFileBundles/Finalize/ParMultiDo(Finalize)")) {
-                            bundle = context.getFinalBundle();
+                        if (transform.getFullName().equals("Writefile/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles")) {
                             WriteEvaluator eval = new WriteEvaluator(transform, bundle, context);
                             eval.execute();
+                            for (Iterator iterator = graph.getAllPerElementConsumers().asMap().values().iterator(); iterator.hasNext(); ) {
+                                transformList = (List) iterator.next();
+                                transform = (AppliedPTransform) transformList.get(0);
+                                if (transform.getFullName().equals("Writefile/WriteFiles/FinalizeTempFileBundles/Finalize/ParMultiDo(Finalize)")) {
+                                    bundle = context.getFinalBundle();
+                                    eval = new WriteEvaluator(transform, bundle, context);
+                                    eval.execute();
+                                    break;
+                                }
+                            }
+                            break;
                         }
                     }
                 }
             }
-
             LOG.info("Siddhi Runner Complete");
         } catch (Exception e) {
             e.printStackTrace();

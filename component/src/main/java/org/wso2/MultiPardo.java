@@ -12,6 +12,9 @@ import org.apache.beam.sdk.values.PCollection;
 import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
 import org.wso2.beam.runner.siddhi.SiddhiRunner;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class MultiPardo {
 
     private interface SiddhiOptions extends SiddhiPipelineOptions, StreamingOptions {
@@ -36,6 +39,19 @@ public class MultiPardo {
         }
     }
 
+    private static class FilterString extends DoFn<String, String> {
+
+        String[] filters = {"the", "a", "is", "of", "has"};
+        List<String> filterList = Arrays.asList(filters);
+
+        @ProcessElement
+        public void processElement(@Element String element, OutputReceiver<String> out) {
+            if (!filterList.contains(element)) {
+                out.output(element);
+            }
+        }
+    }
+
     private static class LetterCount extends DoFn<String, String> {
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<String> out) {
@@ -49,8 +65,9 @@ public class MultiPardo {
         Pipeline pipe = Pipeline.create(options);
         PCollection<String> col1 = pipe.apply("Readfile", TextIO.read().from(options.getInputFile()));
         PCollection<String> col2 = col1.apply("SplitString", ParDo.of(new SplitString()));
-        PCollection<String> col3 = col2.apply("PardoTransform", ParDo.of(new LetterCount()));
-        col3.apply("Writefile", TextIO.write().to(options.getOutput()));
+        PCollection<String> col3 = col2.apply("FilterString", ParDo.of(new FilterString()));
+        PCollection<String> col4 = col3.apply("PardoTransform", ParDo.of(new LetterCount()));
+        col4.apply("Writefile", TextIO.write().to(options.getOutput()));
         pipe.run();
     }
 

@@ -14,6 +14,7 @@ public class ExecutionContext {
     private Iterator rootBundlesIterator;
     private static final ExecutionContext context = new ExecutionContext();
     private AppliedPTransform currentTransform;
+    private PCollection finalCollection;
 
     private ExecutionContext() {}
 
@@ -80,6 +81,14 @@ public class ExecutionContext {
 
     public DirectGraph getGraph() {
         return this.graph;
+    }
+
+    public void setFinalCollection(PCollection collection) {
+        this.finalCollection = collection;
+    }
+
+    public PCollection getFinalCollection() {
+        return this.finalCollection;
     }
 
 }

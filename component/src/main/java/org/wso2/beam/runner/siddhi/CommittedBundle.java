@@ -22,6 +22,10 @@ public class CommittedBundle<T> {
         return this.bundle;
     }
 
+    public void setPCollection(PCollection bundle) {
+        this.bundle = bundle;
+    }
+
     public SourceWrapper getSourceWrapper() {
         return (SourceWrapper) this.values.poll();
     }

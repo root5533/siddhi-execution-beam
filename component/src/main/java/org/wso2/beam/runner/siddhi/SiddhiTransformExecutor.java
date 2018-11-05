@@ -54,6 +54,8 @@ public class SiddhiTransformExecutor {
                 }
             } else {
                 addEventToChunk(event);
+                ExecutionContext context = ExecutionContext.getContext();
+                context.setFinalCollection(collection);
                 LOG.info("Siddhi does not support " + transform.getTransform().toString() + " at the moment");
             }
         } else {
