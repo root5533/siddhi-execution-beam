@@ -48,7 +48,6 @@ public class SiddhiExecutorService {
             for (Iterator roots = context.getRootBundles().iterator(); roots.hasNext(); ) {
                 CommittedBundle<SourceWrapper> rootBundle = (CommittedBundle<SourceWrapper>) roots.next();
                 SourceWrapper source = rootBundle.getSourceWrapper();
-                PCollection pCol = rootBundle.getPCollection();
                 List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
                 AppliedPTransform<?, ?, ?> currentTransform = transforms.get(0);
                 context.setStartTransform(currentTransform);
@@ -59,7 +58,7 @@ public class SiddhiExecutorService {
                 }
                 executionRuntime.setBundle(new CommittedBundle(key));
                 source.open();
-                source.run(executionRuntime.getSiddhiRuntime().getInputHandler("inputStream"), pCol);
+                source.run(executionRuntime.getSiddhiRuntime().getInputHandler("inputStream"), key);
 
                 for (Iterator iter = context.getStartTransform().getOutputs().values().iterator(); iter.hasNext(); ) {
                     key = (PCollection) iter.next();

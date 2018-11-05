@@ -26,16 +26,16 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
 
     private final AppliedPTransform<?, ?, ?> transform;
     private DoFnRunner<InputT, OutputT> delegate;
-    private CommittedBundle<WindowedValue<?>> outputBundle;
-    private ComplexEventChunk<StreamEvent> complexEventChunk;
+    private PCollection collection;
 
-    public SiddhiDoFnOperator(AppliedPTransform transform, ComplexEventChunk<StreamEvent> complexEventChunk) {
-        this.transform = transform;
-        this.complexEventChunk = complexEventChunk;
-    }
+//    public SiddhiDoFnOperator(AppliedPTransform transform, ComplexEventChunk<StreamEvent> complexEventChunk) {
+//        this.transform = transform;
+//        this.complexEventChunk = complexEventChunk;
+//    }
 
-    public SiddhiDoFnOperator(AppliedPTransform transform) {
+    public SiddhiDoFnOperator(AppliedPTransform transform, PCollection collection) {
         this.transform = transform;
+        this.collection = collection;
     }
 
     public void createRunner(CustomEvent event) throws Exception {
@@ -54,41 +54,33 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
         }));
         WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy = event.getPCollection().getWindowingStrategy();
         this.delegate = new SimpleDoFnRunner(options, fn, sideInputReader, outputManager, mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);
+    }
 
-        /**
-         * Create Committed Bundle for output(expecting only 1)
-         */
+//    public void createRunner(CommittedBundle bundle) throws Exception {
+//        PipelineOptions options = this.transform.getPipeline().getOptions();
+//        DoFn<InputT, OutputT> fn = ((ParDo.MultiOutput) this.transform.getTransform()).getFn();
+//        SideInputReader sideInputReader = SiddhiDoFnOperator.LocalSideInputReader.create(ParDoTranslation.getSideInputs(this.transform));
+//        OutputManager outputManager = new SiddhiDoFnOperator.BundleOutputManager();
+//        TupleTag<OutputT> mainOutputTag = (TupleTag<OutputT>) ParDoTranslation.getMainOutputTag(this.transform);
+//        List<TupleTag<?>> additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
+//        StepContext stepContext = SiddhiDoFnOperator.LocalStepContext.create();
+//        Coder<InputT> inputCoder = bundle.getPCollection().getCoder();
+//        Map<TupleTag<?>, Coder<?>> outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
+//            return (TupleTag)e.getKey();
+//        }, (e) -> {
+//            return ((PCollection)e.getValue()).getCoder();
+//        }));
+//        WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy = bundle.getPCollection().getWindowingStrategy();
+//        this.delegate = new SimpleDoFnRunner(options, fn, sideInputReader, outputManager, mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);
+//
+//        /**
+//         * Create Committed Bundle for output(expecting only 1)
+//         */
 //        for (Iterator iter = this.transform.getOutputs().values().iterator(); iter.hasNext();) {
 //            this.outputBundle = new CommittedBundle((PCollection) iter.next());
 //        }
-
-    }
-
-    public void createRunner(CommittedBundle bundle) throws Exception {
-        PipelineOptions options = this.transform.getPipeline().getOptions();
-        DoFn<InputT, OutputT> fn = ((ParDo.MultiOutput) this.transform.getTransform()).getFn();
-        SideInputReader sideInputReader = SiddhiDoFnOperator.LocalSideInputReader.create(ParDoTranslation.getSideInputs(this.transform));
-        OutputManager outputManager = new SiddhiDoFnOperator.BundleOutputManager();
-        TupleTag<OutputT> mainOutputTag = (TupleTag<OutputT>) ParDoTranslation.getMainOutputTag(this.transform);
-        List<TupleTag<?>> additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
-        StepContext stepContext = SiddhiDoFnOperator.LocalStepContext.create();
-        Coder<InputT> inputCoder = bundle.getPCollection().getCoder();
-        Map<TupleTag<?>, Coder<?>> outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
-            return (TupleTag)e.getKey();
-        }, (e) -> {
-            return ((PCollection)e.getValue()).getCoder();
-        }));
-        WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy = bundle.getPCollection().getWindowingStrategy();
-        this.delegate = new SimpleDoFnRunner(options, fn, sideInputReader, outputManager, mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);
-
-        /**
-         * Create Committed Bundle for output(expecting only 1)
-         */
-        for (Iterator iter = this.transform.getOutputs().values().iterator(); iter.hasNext();) {
-            this.outputBundle = new CommittedBundle((PCollection) iter.next());
-        }
-
-    }
+//
+//    }
 
     public void start() {
         this.delegate.startBundle();
@@ -110,10 +102,11 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
 
         @Override
         public <T> void output(TupleTag<T> tag, WindowedValue<T> output) {
-            StreamEvent event = new StreamEvent(0,0,1);
-            Object[] object = {output};
-            event.setOutputData(object);
-            SiddhiDoFnOperator.this.complexEventChunk.add(event);
+            try {
+                SiddhiTransformExecutor.process(output, SiddhiDoFnOperator.this.collection);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

@@ -78,4 +78,8 @@ public class ExecutionContext {
         return this.currentTransform;
     }
 
+    public DirectGraph getGraph() {
+        return this.graph;
+    }
+
 }
