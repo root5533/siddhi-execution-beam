@@ -1,6 +1,5 @@
 package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 
-import org.apache.beam.sdk.util.WindowedValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.beam.runner.siddhi.CustomEvent;
@@ -72,9 +71,9 @@ import java.util.Map;
  * </code></pre>
  */
 
-public class BeamStreamProcessor  extends StreamProcessor {
+public class BeamStreamProcessorPrev extends StreamProcessor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeamStreamProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BeamStreamProcessorPrev.class);
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
@@ -84,9 +83,11 @@ public class BeamStreamProcessor  extends StreamProcessor {
         try {
             while (streamEventChunk.hasNext()) {
                 StreamEvent event = streamEventChunk.next();
-                if (event.getOutputData()[0] instanceof WindowedValue) {
-                    WindowedValue element = (WindowedValue) event.getOutputData()[0];
-                    System.out.println(element.getValue().toString());
+                if (event.getOutputData()[0] instanceof CustomEvent) {
+                    CustomEvent value = (CustomEvent) event.getOutputData()[0];
+                    if (value.getElement().getValue() != null) {
+                        SiddhiTransformExecutor.process(value, complexEventChunk);
+                    }
                 } else {
                     throw new SiddhiAppCreationException("Event should be of type CustomEvent");
                 }
@@ -108,20 +109,7 @@ public class BeamStreamProcessor  extends StreamProcessor {
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                    SiddhiAppContext siddhiAppContext) {
-
-        ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-
-        if (attributeExpressionLength != 2) {
-            throw new SiddhiAppCreationException("Only 2 parameters can be specified for BeamexecutionProcessor");
-        }
-
-        if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.STRING) {
-            attributes.add(new Attribute("transformName", Attribute.Type.LONG));
-        } else {
-            throw new SiddhiAppCreationException("Second parameter must be of type String");
-        }
-
-        return attributes;
+        return new ArrayList<>();
     }
 
     /**

@@ -43,29 +43,32 @@ public class SiddhiExecutorService {
             Create SiddhiAppRuntime
              */
             SiddhiApp executionRuntime = new SiddhiApp();
+            executionRuntime.createSiddhiQuery();
+            executionRuntime.createSiddhiRuntime();
+            executionRuntime.setBundle(new CommittedBundle(null));
+            context.setTransformsMap(executionRuntime.getTransformsMap());
+            context.setCollectionsMap(executionRuntime.getCollectionsMap());
 
             /*
             Emit elements to SiddhiApp
              */
             for (Iterator roots = context.getRootBundles().iterator(); roots.hasNext(); ) {
                 CommittedBundle<SourceWrapper> rootBundle = (CommittedBundle<SourceWrapper>) roots.next();
-                SourceWrapper source = rootBundle.getSourceWrapper();
-                List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
-                AppliedPTransform<?, ?, ?> currentTransform = transforms.get(0);
-                context.setStartTransform(currentTransform);
-
-                PCollection key = null;
-                for (Iterator iter = currentTransform.getOutputs().values().iterator(); iter.hasNext(); ) {
-                    key = (PCollection) iter.next();
+                if (!rootBundle.getPCollection().getName().equals("Readfile/Read.out")) {
+                    continue;
                 }
-                executionRuntime.setBundle(new CommittedBundle(key));
+                SourceWrapper source = rootBundle.getSourceWrapper();
                 source.open();
-                source.run(executionRuntime.getSiddhiRuntime().getInputHandler("inputStream"), key);
+                List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
+                for ( Iterator iter = transforms.iterator(); iter.hasNext(); ) {
+                    AppliedPTransform transform = (AppliedPTransform) iter.next();
+                    String inputStream = transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "Stream";
+                    source.run(executionRuntime.getSiddhiRuntime().getInputHandler(inputStream));
+                }
 
                 /*
                 Finalize output WriteFile
                  */
-
                 CommittedBundle bundle = executionRuntime.getBundle();
                 bundle.setPCollection(context.getFinalCollection());
                 if (bundle.getValues().peek() != null) {
@@ -90,6 +93,7 @@ public class SiddhiExecutorService {
                     }
                 }
             }
+
             LOG.info("Siddhi Runner Complete");
         } catch (Exception e) {
             e.printStackTrace();

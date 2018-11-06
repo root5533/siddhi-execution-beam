@@ -66,7 +66,7 @@ public class MultiPardo {
         PCollection<String> col1 = pipe.apply("Readfile", TextIO.read().from(options.getInputFile()));
         PCollection<String> col2 = col1.apply("SplitString", ParDo.of(new SplitString()));
         PCollection<String> col3 = col2.apply("FilterString", ParDo.of(new FilterString()));
-        PCollection<String> col4 = col3.apply("PardoTransform", ParDo.of(new LetterCount()));
+        PCollection<String> col4 = col3.apply("LetterCount", ParDo.of(new LetterCount()));
         col4.apply("Writefile", TextIO.write().to(options.getOutput()));
         pipe.run();
     }

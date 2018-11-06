@@ -1,5 +1,8 @@
 package org.wso2.beam.runner.siddhi;
 
+import org.apache.beam.sdk.runners.AppliedPTransform;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamStreamProcessor;
@@ -8,19 +11,73 @@ import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.output.StreamCallback;
 
+import java.util.*;
+
 public class SiddhiApp {
 
     private static final Logger LOG = LoggerFactory.getLogger(SiddhiApp.class);
     private SiddhiAppRuntime runtime;
     private CommittedBundle bundle;
+    private Queue<String> streamDefinitions = new LinkedList<>();
+    private Queue<String> queryDefinitions = new LinkedList<>();
+    private HashMap<String, AppliedPTransform> transformsMap = new HashMap<>();
+    private HashMap<String, PCollection> collectionsMap = new HashMap<>();
+    private DirectGraph graph;
+    private AppliedPTransform finalTransform;
 
     public SiddhiApp() {
+
+//        SiddhiManager siddhiManager = new SiddhiManager();
+//        String inputStream = "define stream inputStream (event object);";
+//        String query = "from inputStream#beam:execute(event, \"kkk\") select event insert into outputStream";
+//        siddhiManager.setExtension("beam:execute", BeamStreamProcessor.class);
+//        this.runtime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
+//
+//        runtime.addCallback("outputStream", new StreamCallback() {
+//            @Override
+//            public void receive(Event[] events) {
+//                for ( int i=0; i<events.length; i++ ) {
+//                    Event event = events[i];
+//                    SiddhiApp.this.bundle.addItem(event.getData()[0]);
+//                }
+//            }
+//        });
+
+    }
+
+    public void createSiddhiQuery() {
         LOG.info("Creating Siddhi Runtime");
+        ExecutionContext context = ExecutionContext.getContext();
+        this.graph = context.getGraph();
+        for (Iterator rootBundleIterator = context.getRootBundles().iterator(); rootBundleIterator.hasNext(); ) {
+            CommittedBundle<SourceWrapper> rootBundle = (CommittedBundle) rootBundleIterator.next();
+            if (!rootBundle.getPCollection().getName().equals("Readfile/Read.out")) {
+                continue;
+            }
+            List<AppliedPTransform<?, ?, ?>> transformList = graph.getPerElementConsumers(rootBundle.getPCollection());
+            for (Iterator transformIterator = transformList.iterator(); transformIterator.hasNext(); ) {
+                AppliedPTransform transform = (AppliedPTransform) transformIterator.next();
+                if (transform.getTransform() instanceof ParDo.MultiOutput) {
+                    generateSiddhiQueryForTransform(transform, rootBundle.getPCollection());
+                }
+            }
+        }
+        System.out.println("collectionsMap : " + this.collectionsMap.entrySet().toString());
+    }
+
+    public void createSiddhiRuntime() {
         SiddhiManager siddhiManager = new SiddhiManager();
-        String inputStream = "define stream inputStream (event object);";
-        String query = "from inputStream#beam:execute(event) select event insert into outputStream";
+        String streams = "";
+        String queries = "";
+        for (Iterator iter = this.streamDefinitions.iterator(); iter.hasNext(); ) {
+            streams = streams + iter.next().toString();
+        }
+        for (Iterator iter = this.queryDefinitions.iterator(); iter.hasNext(); ) {
+            queries = queries + iter.next().toString();
+        }
+        System.out.println(streams + queries);
         siddhiManager.setExtension("beam:execute", BeamStreamProcessor.class);
-        this.runtime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
+        this.runtime = siddhiManager.createSiddhiAppRuntime(streams + queries);
 
         runtime.addCallback("outputStream", new StreamCallback() {
             @Override
@@ -33,6 +90,51 @@ public class SiddhiApp {
         });
     }
 
+    private void generateSiddhiQueryForTransform(AppliedPTransform transform, PCollection keyCollection) {
+        /*
+        If transform is not in HashMap
+         */
+        if (this.transformsMap.get(transform.getFullName()) == null) {
+            /*
+            Add stream definition and to HashMap for given transform
+             */
+            String streamName = transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "Stream";
+            String stream = "define stream " + streamName + " (event object);";
+            this.streamDefinitions.add(stream);
+            this.transformsMap.put(transform.getFullName(), transform);
+            this.collectionsMap.put(transform.getFullName(), keyCollection);
+            String finalOutputStream = "outputStream";
+            /*
+            Create queries for each transform mapped by output collections
+             */
+            for ( Iterator transformOuputIterator = transform.getOutputs().values().iterator(); transformOuputIterator.hasNext(); ) {
+                PCollection collection = (PCollection) transformOuputIterator.next();
+                List<AppliedPTransform<?, ?, ?>> transformList = this.graph.getPerElementConsumers(collection);
+                for (Iterator transformListIterator = transformList.iterator(); transformListIterator.hasNext(); ) {
+                    AppliedPTransform nextTransform = (AppliedPTransform) transformListIterator.next();
+                    String outputStreamName = nextTransform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "Stream";
+                    if (nextTransform.getTransform() instanceof ParDo.MultiOutput) {
+                        String query = "from " + streamName + "#beam:execute(event, \"" + transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "\") " +
+                                "select event insert into " + outputStreamName + ";";
+                        this.queryDefinitions.add(query);
+                        generateSiddhiQueryForTransform(nextTransform, collection);
+                    } else {
+                        LOG.info("Siddhi does not support " + nextTransform.getTransform().toString() + " at the moment");
+                        if (this.finalTransform == null) {
+                            this.finalTransform = transform;
+                        }
+                        String finalQuery = "from " + streamName + "#beam:execute(event, \"" + transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "\") " +
+                                "select event insert into " + finalOutputStream + ";";
+                        if (!this.queryDefinitions.contains(finalQuery)) {
+                            this.queryDefinitions.add(finalQuery);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
     public void setBundle(CommittedBundle bundle) {
         this.bundle = bundle;
     }
@@ -43,6 +145,14 @@ public class SiddhiApp {
 
     public SiddhiAppRuntime getSiddhiRuntime() {
         return this.runtime;
+    }
+
+    public HashMap<String, AppliedPTransform> getTransformsMap() {
+        return this.transformsMap;
+    }
+
+    public HashMap<String, PCollection> getCollectionsMap() {
+        return this.collectionsMap;
     }
 
 }

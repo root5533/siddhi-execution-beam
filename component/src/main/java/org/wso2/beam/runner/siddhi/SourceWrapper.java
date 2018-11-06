@@ -44,7 +44,7 @@ public class SourceWrapper<OutputT> {
         }
     }
 
-    public void run(DoFnOperator op) throws Exception {
+    public void run(InputHandler inputHandler) throws Exception {
 
         /**
          *Run the source to emit each element to DoFnOperator delegate
@@ -53,46 +53,20 @@ public class SourceWrapper<OutputT> {
             BoundedReader<OutputT> reader = localReaders.get(0);
             boolean hasData = reader.start();
             if (hasData) {
-                this.emitElement(op, reader);
+                this.emitElement(inputHandler, reader);
             }
             hasData = reader.advance();
             while (hasData) {
-                this.emitElement(op, reader);
+                this.emitElement(inputHandler, reader);
                 hasData = reader.advance();
             }
         }
 
     }
 
-    private void emitElement(DoFnOperator op, BoundedReader reader) {
+    private void emitElement (InputHandler inputHandler, BoundedReader reader) throws Exception {
         WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-        op.processElement(elem);
-    }
-
-    public void run(InputHandler inputHandler, PCollection pCol) throws Exception {
-
-        /**
-         *Run the source to emit each element to DoFnOperator delegate
-         */
-        if (this.localReaders.size() == 1) {
-            BoundedReader<OutputT> reader = localReaders.get(0);
-            boolean hasData = reader.start();
-            if (hasData) {
-                this.emitElement(inputHandler, reader, pCol);
-            }
-            hasData = reader.advance();
-            while (hasData) {
-                this.emitElement(inputHandler, reader, pCol);
-                hasData = reader.advance();
-            }
-        }
-
-    }
-
-    private void emitElement (InputHandler inputHandler, BoundedReader reader, PCollection pCol) throws Exception {
-        WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-        CustomEvent event = CustomEvent.create(elem, pCol);
-        inputHandler.send(new Object[]{event});
+        inputHandler.send(new Object[]{elem});
     }
 
 }

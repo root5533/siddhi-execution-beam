@@ -15,6 +15,8 @@ public class ExecutionContext {
     private static final ExecutionContext context = new ExecutionContext();
     private AppliedPTransform currentTransform;
     private PCollection finalCollection;
+    private HashMap<String, AppliedPTransform> transformsMap = new HashMap<>();
+    private HashMap<String, PCollection> collectionsMap = new HashMap<>();
 
     private ExecutionContext() {}
 
@@ -89,6 +91,22 @@ public class ExecutionContext {
 
     public PCollection getFinalCollection() {
         return this.finalCollection;
+    }
+
+    public void setTransformsMap(HashMap<String, AppliedPTransform> map) {
+        this.transformsMap = map;
+    }
+
+    public void setCollectionsMap(HashMap<String, PCollection> map) {
+        this.collectionsMap = map;
+    }
+
+    public HashMap<String, AppliedPTransform> getTransformsMap() {
+        return this.transformsMap;
+    }
+
+    public HashMap<String, PCollection> getCollectionsMap() {
+        return this.collectionsMap;
     }
 
 }
