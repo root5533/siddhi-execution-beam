@@ -24,7 +24,7 @@ public class MultiPardo {
         void setInputFile(String value);
 
         @Description("Set output target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/outputs/result")
+        @Default.String("/outputs/result")
         String getOutput();
         void setOutput(String value);
     }
@@ -72,7 +72,7 @@ public class MultiPardo {
     }
 
     public static void main(String[] args) {
-        SiddhiOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiOptions.class);
+           SiddhiOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiOptions.class);
         options.setRunner(SiddhiRunner.class);
         runSimpleSiddhiApp(options);
     }

@@ -101,12 +101,12 @@ public class ExecutionContext {
         this.collectionsMap = map;
     }
 
-    public HashMap<String, AppliedPTransform> getTransformsMap() {
-        return this.transformsMap;
+    public AppliedPTransform getTransfromFromName(String key) {
+        return this.transformsMap.get(key);
     }
 
-    public HashMap<String, PCollection> getCollectionsMap() {
-        return this.collectionsMap;
+    public PCollection getCollectionFromName(String key) {
+        return this.collectionsMap.get(key);
     }
 
 }

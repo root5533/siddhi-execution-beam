@@ -23,30 +23,12 @@ public class SiddhiApp {
     private HashMap<String, AppliedPTransform> transformsMap = new HashMap<>();
     private HashMap<String, PCollection> collectionsMap = new HashMap<>();
     private DirectGraph graph;
-    private AppliedPTransform finalTransform;
+    private PCollection finalCollection;
 
-    public SiddhiApp() {
-
-//        SiddhiManager siddhiManager = new SiddhiManager();
-//        String inputStream = "define stream inputStream (event object);";
-//        String query = "from inputStream#beam:execute(event, \"kkk\") select event insert into outputStream";
-//        siddhiManager.setExtension("beam:execute", BeamStreamProcessor.class);
-//        this.runtime = siddhiManager.createSiddhiAppRuntime(inputStream + query);
-//
-//        runtime.addCallback("outputStream", new StreamCallback() {
-//            @Override
-//            public void receive(Event[] events) {
-//                for ( int i=0; i<events.length; i++ ) {
-//                    Event event = events[i];
-//                    SiddhiApp.this.bundle.addItem(event.getData()[0]);
-//                }
-//            }
-//        });
-
-    }
+    public SiddhiApp() { }
 
     public void createSiddhiQuery() {
-        LOG.info("Creating Siddhi Runtime");
+        LOG.info("Creating Siddhi Query");
         ExecutionContext context = ExecutionContext.getContext();
         this.graph = context.getGraph();
         for (Iterator rootBundleIterator = context.getRootBundles().iterator(); rootBundleIterator.hasNext(); ) {
@@ -66,6 +48,7 @@ public class SiddhiApp {
     }
 
     public void createSiddhiRuntime() {
+        LOG.info("Creating Siddhi Runtime");
         SiddhiManager siddhiManager = new SiddhiManager();
         String streams = "";
         String queries = "";
@@ -101,8 +84,8 @@ public class SiddhiApp {
             String streamName = transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "Stream";
             String stream = "define stream " + streamName + " (event object);";
             this.streamDefinitions.add(stream);
-            this.transformsMap.put(transform.getFullName(), transform);
-            this.collectionsMap.put(transform.getFullName(), keyCollection);
+            this.transformsMap.put(transform.getFullName().replace('/', '_').replace('(', '_').replace(")", ""), transform);
+            this.collectionsMap.put(transform.getFullName().replace('/', '_').replace('(', '_').replace(")", ""), keyCollection);
             String finalOutputStream = "outputStream";
             /*
             Create queries for each transform mapped by output collections
@@ -120,8 +103,8 @@ public class SiddhiApp {
                         generateSiddhiQueryForTransform(nextTransform, collection);
                     } else {
                         LOG.info("Siddhi does not support " + nextTransform.getTransform().toString() + " at the moment");
-                        if (this.finalTransform == null) {
-                            this.finalTransform = transform;
+                        if (this.finalCollection == null) {
+                            this.finalCollection = collection;
                         }
                         String finalQuery = "from " + streamName + "#beam:execute(event, \"" + transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "\") " +
                                 "select event insert into " + finalOutputStream + ";";
@@ -153,6 +136,10 @@ public class SiddhiApp {
 
     public HashMap<String, PCollection> getCollectionsMap() {
         return this.collectionsMap;
+    }
+
+    public PCollection getFinalCollection() {
+        return this.finalCollection;
     }
 
 }

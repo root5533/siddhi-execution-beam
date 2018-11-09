@@ -44,10 +44,10 @@ public class SiddhiExecutorService {
              */
             SiddhiApp executionRuntime = new SiddhiApp();
             executionRuntime.createSiddhiQuery();
-            executionRuntime.createSiddhiRuntime();
-            executionRuntime.setBundle(new CommittedBundle(null));
             context.setTransformsMap(executionRuntime.getTransformsMap());
             context.setCollectionsMap(executionRuntime.getCollectionsMap());
+            executionRuntime.createSiddhiRuntime();
+            executionRuntime.setBundle(new CommittedBundle(null));
 
             /*
             Emit elements to SiddhiApp
@@ -70,7 +70,7 @@ public class SiddhiExecutorService {
                 Finalize output WriteFile
                  */
                 CommittedBundle bundle = executionRuntime.getBundle();
-                bundle.setPCollection(context.getFinalCollection());
+                bundle.setPCollection(executionRuntime.getFinalCollection());
                 if (bundle.getValues().peek() != null) {
                     for (Iterator iter = graph.getAllPerElementConsumers().asMap().values().iterator(); iter.hasNext(); ) {
                         List transformList = (List) iter.next();
