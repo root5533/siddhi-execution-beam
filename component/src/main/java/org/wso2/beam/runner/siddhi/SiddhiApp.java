@@ -1,6 +1,8 @@
 package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.sdk.runners.AppliedPTransform;
+import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
@@ -39,7 +41,7 @@ public class SiddhiApp {
             List<AppliedPTransform<?, ?, ?>> transformList = graph.getPerElementConsumers(rootBundle.getPCollection());
             for (Iterator transformIterator = transformList.iterator(); transformIterator.hasNext(); ) {
                 AppliedPTransform transform = (AppliedPTransform) transformIterator.next();
-                if (transform.getTransform() instanceof ParDo.MultiOutput) {
+                if (SiddhiApp.compatibleTransform(transform.getTransform())) {
                     generateSiddhiQueryForTransform(transform, rootBundle.getPCollection());
                 }
             }
@@ -81,11 +83,11 @@ public class SiddhiApp {
             /*
             Add stream definition and to HashMap for given transform
              */
-            String streamName = transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "Stream";
+            String streamName = SiddhiApp.stringTransform(transform.getFullName()) + "Stream";
             String stream = "define stream " + streamName + " (event object);";
             this.streamDefinitions.add(stream);
-            this.transformsMap.put(transform.getFullName().replace('/', '_').replace('(', '_').replace(")", ""), transform);
-            this.collectionsMap.put(transform.getFullName().replace('/', '_').replace('(', '_').replace(")", ""), keyCollection);
+            this.transformsMap.put(SiddhiApp.stringTransform(transform.getFullName()), transform);
+            this.collectionsMap.put(SiddhiApp.stringTransform(transform.getFullName()), keyCollection);
             String finalOutputStream = "outputStream";
             /*
             Create queries for each transform mapped by output collections
@@ -95,9 +97,9 @@ public class SiddhiApp {
                 List<AppliedPTransform<?, ?, ?>> transformList = this.graph.getPerElementConsumers(collection);
                 for (Iterator transformListIterator = transformList.iterator(); transformListIterator.hasNext(); ) {
                     AppliedPTransform nextTransform = (AppliedPTransform) transformListIterator.next();
-                    String outputStreamName = nextTransform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "Stream";
-                    if (nextTransform.getTransform() instanceof ParDo.MultiOutput) {
-                        String query = "from " + streamName + "#beam:execute(event, \"" + transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "\") " +
+                    String outputStreamName = SiddhiApp.stringTransform(nextTransform.getFullName()) + "Stream";
+                    if (SiddhiApp.compatibleTransform(nextTransform.getTransform())) {
+                        String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
                                 "select event insert into " + outputStreamName + ";";
                         this.queryDefinitions.add(query);
                         generateSiddhiQueryForTransform(nextTransform, collection);
@@ -106,7 +108,7 @@ public class SiddhiApp {
                         if (this.finalCollection == null) {
                             this.finalCollection = collection;
                         }
-                        String finalQuery = "from " + streamName + "#beam:execute(event, \"" + transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "\") " +
+                        String finalQuery = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
                                 "select event insert into " + finalOutputStream + ";";
                         if (!this.queryDefinitions.contains(finalQuery)) {
                             this.queryDefinitions.add(finalQuery);
@@ -116,6 +118,16 @@ public class SiddhiApp {
             }
         }
 
+    }
+
+    public static boolean compatibleTransform(PTransform transform) {
+        if (transform instanceof ParDo.MultiOutput) {
+            return true;
+        }
+        if (transform instanceof GroupByKey) {
+            return true;
+        }
+        return false;
     }
 
     public void setBundle(CommittedBundle bundle) {
@@ -140,6 +152,10 @@ public class SiddhiApp {
 
     public PCollection getFinalCollection() {
         return this.finalCollection;
+    }
+
+    public static String stringTransform(String value) {
+        return value.replace('/', '_').replace('(', '_').replace(")", "").replace('.','_');
     }
 
 }

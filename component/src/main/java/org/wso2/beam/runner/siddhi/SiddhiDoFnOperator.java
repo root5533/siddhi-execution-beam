@@ -7,6 +7,8 @@ import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
 import org.apache.beam.sdk.util.WindowedValue;
@@ -28,6 +30,16 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
     private DoFnRunner<InputT, OutputT> delegate;
     private PCollection collection;
     private ComplexEventChunk complexEventChunk;
+    private PipelineOptions options;
+    private SideInputReader sideInputReader;
+    private OutputManager outputManager;
+    private TupleTag<OutputT> mainOutputTag;
+    private List<TupleTag<?>> additionalOutputTags;
+    private StepContext stepContext;
+    private Coder<InputT> inputCoder;
+    private Map<TupleTag<?>, Coder<?>> outputCoders;
+    private WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy;
+    private DoFn<InputT, OutputT> fn;
 
     public SiddhiDoFnOperator(AppliedPTransform transform, PCollection collection) {
         this.transform = transform;
@@ -35,20 +47,20 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
     }
 
     public void createRunner() throws Exception {
-        PipelineOptions options = this.transform.getPipeline().getOptions();
-        DoFn<InputT, OutputT> fn = ((ParDo.MultiOutput) this.transform.getTransform()).getFn();
-        SideInputReader sideInputReader = SiddhiDoFnOperator.LocalSideInputReader.create(ParDoTranslation.getSideInputs(this.transform));
-        OutputManager outputManager = new SiddhiDoFnOperator.BundleOutputManager();
-        TupleTag<OutputT> mainOutputTag = (TupleTag<OutputT>) ParDoTranslation.getMainOutputTag(this.transform);
-        List<TupleTag<?>> additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
-        StepContext stepContext = SiddhiDoFnOperator.LocalStepContext.create();
-        Coder<InputT> inputCoder = this.collection.getCoder();
-        Map<TupleTag<?>, Coder<?>> outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
+        this.options = this.transform.getPipeline().getOptions();
+        this.sideInputReader = SiddhiDoFnOperator.LocalSideInputReader.create(ParDoTranslation.getSideInputs(this.transform));
+        this.outputManager = new SiddhiDoFnOperator.BundleOutputManager();
+        this.mainOutputTag = (TupleTag<OutputT>) ParDoTranslation.getMainOutputTag(this.transform);
+        this.additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
+        this.stepContext = SiddhiDoFnOperator.LocalStepContext.create();
+        this.inputCoder = this.collection.getCoder();
+        this.outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
             return (TupleTag)e.getKey();
         }, (e) -> {
             return ((PCollection)e.getValue()).getCoder();
         }));
-        WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy = this.collection.getWindowingStrategy();
+        this.windowingStrategy = this.collection.getWindowingStrategy();
+        DoFn<InputT, OutputT> fn = this.getDoFn(this.transform.getTransform());
         this.delegate = new SimpleDoFnRunner(options, fn, sideInputReader, outputManager, mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);
     }
 
@@ -67,6 +79,16 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private DoFn getDoFn(PTransform transform) {
+        if (transform instanceof ParDo.MultiOutput) {
+            return ((ParDo.MultiOutput) this.transform.getTransform()).getFn();
+        }
+        if (transform instanceof GroupByKey) {
+            return GroupAlsoByWindowViaWindowSetNewDoFn.create(this.windowingStrategy, stateInternalsFactory, timerInternalsFactory, this.sideInputReader, this.systemReduceFn, this.outputManager, this.mainOutputTag);
+        }
+        return null;
     }
 
     private class BundleOutputManager implements OutputManager {

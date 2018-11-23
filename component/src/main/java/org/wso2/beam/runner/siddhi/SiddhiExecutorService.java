@@ -62,7 +62,7 @@ public class SiddhiExecutorService {
                 List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
                 for ( Iterator iter = transforms.iterator(); iter.hasNext(); ) {
                     AppliedPTransform transform = (AppliedPTransform) iter.next();
-                    String inputStream = transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "Stream";
+                    String inputStream = SiddhiApp.stringTransform(transform.getFullName()) + "Stream";
                     source.run(executionRuntime.getSiddhiRuntime().getInputHandler(inputStream));
                 }
 
