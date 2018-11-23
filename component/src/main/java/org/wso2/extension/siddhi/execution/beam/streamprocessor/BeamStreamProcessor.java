@@ -1,11 +1,14 @@
 package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 
 import org.apache.beam.sdk.runners.AppliedPTransform;
+import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.beam.runner.siddhi.ExecutionContext;
+import org.wso2.beam.runner.siddhi.GroupDoFnOperator;
 import org.wso2.beam.runner.siddhi.SiddhiDoFnOperator;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -132,7 +135,14 @@ public class BeamStreamProcessor  extends StreamProcessor {
                 ExecutionContext context = ExecutionContext.getContext();
                 AppliedPTransform transform = context.getTransfromFromName(this.beamTransform);
                 PCollection collection = context.getCollectionFromName(this.beamTransform);
-                SiddhiDoFnOperator operator = new SiddhiDoFnOperator(transform, collection);
+                SiddhiDoFnOperator operator;
+                if (transform.getTransform() instanceof ParDo.MultiOutput) {
+                    operator = new SiddhiDoFnOperator(transform, collection);
+                } else if (transform.getTransform() instanceof GroupByKey) {
+                    operator = new GroupDoFnOperator(transform, collection);
+                } else {
+                    operator = null;
+                }
                 operator.createRunner();
                 operator.start();
                 this.operator = operator;

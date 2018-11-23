@@ -80,7 +80,6 @@ public class DoFnOperator<InputT, OutputT> {
 
         @Override
         public <T> void output(TupleTag<T> tag, WindowedValue<T> output) {
-            System.out.println("DoFnOperator : BundleOutputManager : output() : " + output.getValue().toString());
             DoFnOperator.this.outputBundle.addItem(output);
         }
     }

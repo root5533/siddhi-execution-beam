@@ -37,7 +37,6 @@ public class GroupByKeySiddhi
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
             String[] words = element.split(",");
             if (Arrays.asList(regions).contains(words[0].trim())) {
-//                System.out.println("region selected : " + words[0]);
                 KV<String, String[]> kv = KV.of(words[0], Arrays.copyOfRange(words, 1, words.length));
                 out.output(kv);
             }
