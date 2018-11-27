@@ -1,32 +1,22 @@
 package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 
-import org.apache.beam.sdk.runners.AppliedPTransform;
-import org.apache.beam.sdk.transforms.GroupByKey;
-import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.util.WindowedValue;
-import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.KV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.beam.runner.siddhi.ExecutionContext;
-import org.wso2.beam.runner.siddhi.GroupDoFnOperator;
-import org.wso2.beam.runner.siddhi.SiddhiDoFnOperator;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This is a sample class-level comment, explaining what the extension class does.
@@ -78,43 +68,52 @@ import java.util.Map;
  * </code></pre>
  */
 
-public class BeamStreamProcessor  extends StreamProcessor {
+public class GroupByKeyProcessor<K, V> extends StreamProcessor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeamStreamProcessor.class);
-    private String beamTransform;
-    private SiddhiDoFnOperator operator;
+    private static final Logger LOG = LoggerFactory.getLogger(GroupByKeyProcessor.class);
+    private HashMap<K, ArrayList<V>> groupByKey = new HashMap();
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        LOG.info("Processing element in >>>>> " + this.beamTransform);
+        LOG.info("Grouping elemets >>>><<<<");
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         try {
             while (streamEventChunk.hasNext()) {
                 StreamEvent event = streamEventChunk.next();
                 for (int i=0; i<event.getOutputData().length; i++) {
                     if (event.getOutputData()[i] instanceof WindowedValue) {
-                        this.operator.processElement((WindowedValue) event.getOutputData()[i], complexEventChunk);
+                        KV element = (KV) ((WindowedValue) event.getOutputData()[i]).getValue();
+                        if (this.groupByKey.containsKey(element.getKey())) {
+                            ArrayList<V> items = this.groupByKey.get(element.getKey());
+                            items.add((V) element.getValue());
+                            this.groupByKey.put((K) element.getKey(), items);
+                        } else {
+                            ArrayList<V> item = new ArrayList<>();
+                            item.add((V) element.getValue());
+                            this.groupByKey.put((K) element.getKey(), item);
+                        }
                     }
                 }
-                this.operator.finish();
             }
+            for (Iterator iter = this.groupByKey.entrySet().iterator(); iter.hasNext();) {
+                 Map.Entry map = (Map.Entry) iter.next();
+                 K key = (K) map.getKey();
+                 ArrayList<V> value = (ArrayList<V>) map.getValue();
+                 KV kv = KV.of(key, value);
+                 StreamEvent streamEvent = new StreamEvent(0,0,1);
+                 streamEvent.setOutputData(WindowedValue.valueInGlobalWindow(kv), 0);
+                 complexEventChunk.add(streamEvent);
+            }
+            nextProcessor.process(complexEventChunk);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            nextProcessor.process(complexEventChunk);
         }
 
     }
 
-    /**
-     * The initialization method for {@link StreamProcessor}, which will be called before other methods and validate
-     * the all configuration and getting the initial values.
-     * @param attributeExpressionExecutors are the executors of each attributes in the Function
-     * @param configReader        this hold the {@link StreamProcessor} extensions configuration reader.
-     * @param siddhiAppContext    Siddhi app runtime context
-     */
+
     @Override
     protected List<Attribute> init(AbstractDefinition inputDefinition,
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
@@ -122,24 +121,14 @@ public class BeamStreamProcessor  extends StreamProcessor {
 
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
-        if (attributeExpressionLength != 2) {
-            throw new SiddhiAppCreationException("Only 2 parameters can be specified for BeamExecutionProcessor");
+        if (attributeExpressionLength != 1) {
+            throw new SiddhiAppCreationException("Only 1 parameter can be specified for GroupByKeyProcessor");
         }
 
-        if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.STRING) {
-            /**
-             * Get beam transform here and create DoFnOperator
-             */
+        if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
+
             try {
-                this.beamTransform = ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue().toString();
-                ExecutionContext context = ExecutionContext.getContext();
-                AppliedPTransform transform = context.getTransfromFromName(this.beamTransform);
-                PCollection collection = context.getCollectionFromName(this.beamTransform);
-                SiddhiDoFnOperator operator;
-                operator = new SiddhiDoFnOperator(transform, collection);
-                operator.createRunner();
-                operator.start();
-                this.operator = operator;
+//                System.out.println("GroupByKeyProcessor init()");
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -150,47 +139,18 @@ public class BeamStreamProcessor  extends StreamProcessor {
         return attributes;
     }
 
-    /**
-     * This will be called only once and this can be used to acquire
-     * required resources for the processing element.
-     * This will be called after initializing the system and before
-     * starting to process the events.
-     */
+
     @Override
-    public void start() {
+    public void start() { }
 
-    }
-
-    /**
-     * This will be called only once and this can be used to release
-     * the acquired resources for processing.
-     * This will be called before shutting down the system.
-     */
     @Override
-    public void stop() {
+    public void stop() { }
 
-    }
-
-    /**
-     * Used to collect the serializable state of the processing element, that need to be
-     * persisted for reconstructing the element to the same state on a different point of time
-     *
-     * @return stateful objects of the processing element as an map
-     */
     @Override
     public Map<String, Object> currentState() {
         return null;
     }
 
-    /**
-     * Used to restore serialized state of the processing element, for reconstructing
-     * the element to the same state as if was on a previous point of time.
-     *
-     * @param state the stateful objects of the processing element as a map.
-     *              This is the same map that is created upon calling currentState() method.
-     */
     @Override
-    public void restoreState(Map<String, Object> state) {
-
-    }
+    public void restoreState(Map<String, Object> state) { }
 }

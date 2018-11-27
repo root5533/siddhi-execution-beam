@@ -8,6 +8,7 @@ import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamStreamProcessor;
+import org.wso2.extension.siddhi.execution.beam.streamprocessor.GroupByKeyProcessor;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -62,6 +63,7 @@ public class SiddhiApp {
         }
         System.out.println(streams + queries);
         siddhiManager.setExtension("beam:execute", BeamStreamProcessor.class);
+        siddhiManager.setExtension("beam:groupbykey", GroupByKeyProcessor.class);
         this.runtime = siddhiManager.createSiddhiAppRuntime(streams + queries);
 
         runtime.addCallback("outputStream", new StreamCallback() {
@@ -99,10 +101,18 @@ public class SiddhiApp {
                     AppliedPTransform nextTransform = (AppliedPTransform) transformListIterator.next();
                     String outputStreamName = SiddhiApp.stringTransform(nextTransform.getFullName()) + "Stream";
                     if (SiddhiApp.compatibleTransform(nextTransform.getTransform())) {
-                        String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
-                                "select event insert into " + outputStreamName + ";";
-                        this.queryDefinitions.add(query);
-                        generateSiddhiQueryForTransform(nextTransform, collection);
+                        if (transform.getTransform() instanceof ParDo.MultiOutput) {
+                            String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
+                                    "select event insert into " + outputStreamName + ";";
+                            this.queryDefinitions.add(query);
+                            generateSiddhiQueryForTransform(nextTransform, collection);
+                        }
+                        if (transform.getTransform() instanceof GroupByKey) {
+                            String query = "from " + streamName + "#beam:groupbykey(event) " +
+                                    "select event insert into " + outputStreamName + ";";
+                            this.queryDefinitions.add(query);
+                            generateSiddhiQueryForTransform(nextTransform, collection);
+                        }
                     } else {
                         LOG.info("Siddhi does not support " + nextTransform.getTransform().toString() + " at the moment");
                         if (this.finalCollection == null) {

@@ -83,9 +83,6 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
 
         @Override
         public <T> void output(TupleTag<T> tag, WindowedValue<T> output) {
-            if (output.getValue() instanceof KV) {
-                output = (WindowedValue) output.withValue(new SingletonKeyedWorkItem(((KV)output.getValue()).getKey(), output.withValue(((KV)output.getValue()).getValue())));
-            }
             try {
                 StreamEvent streamEvent = new StreamEvent(0, 0, 1);
                 streamEvent.setOutputData(output, 0);
