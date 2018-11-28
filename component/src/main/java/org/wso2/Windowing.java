@@ -4,21 +4,24 @@ import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.options.*;
 import org.apache.beam.sdk.transforms.*;
+import org.apache.beam.sdk.transforms.windowing.FixedWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
+import org.joda.time.Duration;
 import org.wso2.beam.runner.siddhi.SiddhiRunner;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
 
-public class GroupByKeySiddhi
+public class Windowing
 {
 
     private interface CSVOptions extends PipelineOptions, StreamingOptions {
 
         @Description("Set input target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/input-small.csv")
+        @Default.String("/Users/admin/Projects/siddhi-execution-beam/input.csv")
         String getInputFile();
         void setInputFile(String value);
 
@@ -37,7 +40,7 @@ public class GroupByKeySiddhi
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
             String[] words = element.split(",");
             if (Arrays.asList(regions).contains(words[0].trim())) {
-                KV<String, String[]> kv = KV.of(words[0], Arrays.copyOfRange(words, 1, words.length));
+                KV<String, String[]> kv = KV.of(words[0].trim(), Arrays.copyOfRange(words, 1, words.length));
                 out.output(kv);
             }
         }
@@ -80,6 +83,7 @@ public class GroupByKeySiddhi
 
         Pipeline pipe = Pipeline.create(options);
         pipe.apply("Readfile", TextIO.read().from(options.getInputFile()))
+                .apply(Window.into(FixedWindows.of(Duration.standardSeconds(2))))
                 .apply(new CSVFilterRegion())
                 .apply(GroupByKey.<String, String[]>create())
                 .apply(MapElements.via(new FindKeyValueFn()))

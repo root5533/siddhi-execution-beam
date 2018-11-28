@@ -77,7 +77,7 @@ public class GroupByKeyProcessor<K, V> extends StreamProcessor {
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        LOG.info("Grouping elemets >>>><<<<");
+        LOG.info("Grouping elements >>>><<<<");
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         try {
             while (streamEventChunk.hasNext()) {

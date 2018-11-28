@@ -4,7 +4,10 @@ import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.windowing.FixedWindows;
+import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.PCollection;
+import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamStreamProcessor;
@@ -47,7 +50,6 @@ public class SiddhiApp {
                 }
             }
         }
-        System.out.println("collectionsMap : " + this.collectionsMap.entrySet().toString());
     }
 
     public void createSiddhiRuntime() {
@@ -86,7 +88,8 @@ public class SiddhiApp {
             Add stream definition and to HashMap for given transform
              */
             String streamName = SiddhiApp.stringTransform(transform.getFullName()) + "Stream";
-            String stream = "define stream " + streamName + " (event object);";
+            String sink = "";
+            String stream = sink + "define stream " + streamName + " (event object);";
             this.streamDefinitions.add(stream);
             this.transformsMap.put(SiddhiApp.stringTransform(transform.getFullName()), transform);
             this.collectionsMap.put(SiddhiApp.stringTransform(transform.getFullName()), keyCollection);
@@ -99,35 +102,49 @@ public class SiddhiApp {
                 List<AppliedPTransform<?, ?, ?>> transformList = this.graph.getPerElementConsumers(collection);
                 for (Iterator transformListIterator = transformList.iterator(); transformListIterator.hasNext(); ) {
                     AppliedPTransform nextTransform = (AppliedPTransform) transformListIterator.next();
-                    String outputStreamName = SiddhiApp.stringTransform(nextTransform.getFullName()) + "Stream";
+                    String outputStreamName;
                     if (SiddhiApp.compatibleTransform(nextTransform.getTransform())) {
-                        if (transform.getTransform() instanceof ParDo.MultiOutput) {
-                            String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
-                                    "select event insert into " + outputStreamName + ";";
-                            this.queryDefinitions.add(query);
-                            generateSiddhiQueryForTransform(nextTransform, collection);
-                        }
-                        if (transform.getTransform() instanceof GroupByKey) {
-                            String query = "from " + streamName + "#beam:groupbykey(event) " +
-                                    "select event insert into " + outputStreamName + ";";
-                            this.queryDefinitions.add(query);
-                            generateSiddhiQueryForTransform(nextTransform, collection);
-                        }
+                        outputStreamName = SiddhiApp.stringTransform(nextTransform.getFullName()) + "Stream";
                     } else {
                         LOG.info("Siddhi does not support " + nextTransform.getTransform().toString() + " at the moment");
                         if (this.finalCollection == null) {
                             this.finalCollection = collection;
                         }
-                        String finalQuery = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
-                                "select event insert into " + finalOutputStream + ";";
-                        if (!this.queryDefinitions.contains(finalQuery)) {
-                            this.queryDefinitions.add(finalQuery);
+                        outputStreamName = finalOutputStream;
+                    }
+                    if (transform.getTransform() instanceof ParDo.MultiOutput) {
+                        String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
+                                "select event insert into " + outputStreamName + ";";
+                        this.queryDefinitions.add(query);
+                        generateSiddhiQueryForTransform(nextTransform, collection);
+                    }
+                    if (transform.getTransform() instanceof GroupByKey) {
+                        String query = "from " + streamName + "#beam:groupbykey(event) " +
+                                "select event insert into " + outputStreamName + ";";
+                        this.queryDefinitions.add(query);
+                        generateSiddhiQueryForTransform(nextTransform, collection);
+                    }
+                    if (transform.getTransform() instanceof Window.Assign) {
+                        String query = "";
+                        Window.Assign windowTransform = (Window.Assign) transform.getTransform();
+                        if (windowTransform.getWindowFn() instanceof FixedWindows) {
+                            FixedWindows fixedWindow = (FixedWindows) windowTransform.getWindowFn();
+                            Duration size = fixedWindow.getSize();
+                            Duration offSet = fixedWindow.getOffset();
+                            query += "from " + streamName + "#window.timeBatch(" + size.getStandardSeconds() + " sec";
+                            if (offSet == Duration.ZERO) {
+                                query += ")";
+                            } else {
+                                query += ", " + offSet.getStandardSeconds() + " sec)";
+                            }
+                            query += " select event insert into " + outputStreamName + ";";
                         }
+                        this.queryDefinitions.add(query);
+                        generateSiddhiQueryForTransform(nextTransform, collection);
                     }
                 }
             }
         }
-
     }
 
     public static boolean compatibleTransform(PTransform transform) {
@@ -136,6 +153,11 @@ public class SiddhiApp {
         }
         if (transform instanceof GroupByKey) {
             return true;
+        }
+        if (transform instanceof Window.Assign) {
+            if (((Window.Assign) transform).getWindowFn() instanceof FixedWindows) {
+                return true;
+            }
         }
         return false;
     }
