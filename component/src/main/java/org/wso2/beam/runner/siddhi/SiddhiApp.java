@@ -2,7 +2,6 @@ package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.transforms.GroupByKey;
-import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.windowing.FixedWindows;
 import org.apache.beam.sdk.transforms.windowing.GlobalWindows;
@@ -31,6 +30,8 @@ public class SiddhiApp {
     private HashMap<String, PCollection> collectionsMap = new HashMap<>();
     private DirectGraph graph;
     private PCollection finalCollection;
+    private String writeStreamName = "writeStream";
+    private String finalStream = "outputStream";
 
     public SiddhiApp() { }
 
@@ -46,11 +47,33 @@ public class SiddhiApp {
             List<AppliedPTransform<?, ?, ?>> transformList = graph.getPerElementConsumers(rootBundle.getPCollection());
             for (Iterator transformIterator = transformList.iterator(); transformIterator.hasNext(); ) {
                 AppliedPTransform transform = (AppliedPTransform) transformIterator.next();
-                if (SiddhiApp.compatibleTransform(transform.getTransform())) {
+                if (SiddhiApp.compatibleTransform(transform)) {
                     generateSiddhiQueryForTransform(transform, rootBundle.getPCollection());
                 }
             }
         }
+
+        /*
+        Create final writeStream siddhi query(hardcoded)
+         */
+        for (Iterator iterator = this.graph.getAllPerElementConsumers().asMap().values().iterator(); iterator.hasNext(); ) {
+            List transformList = (List) iterator.next();
+            AppliedPTransform transform = (AppliedPTransform) transformList.get(0);
+            if (transform.getFullName().equals("Writefile/WriteFiles/FinalizeTempFileBundles/Finalize/ParMultiDo(Finalize)")) {
+                String stream = "define stream writeStream (event object);";
+                this.streamDefinitions.add(stream);
+                this.transformsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), transform);
+                for (Iterator iter = transform.getInputs().values().iterator(); iter.hasNext();) {
+                    PCollection collection = (PCollection) iter.next();
+                    this.collectionsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), collection);
+                    break;
+                }
+                String query = "from " + this.writeStreamName + "#beam:execute(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
+                        "select event insert into " + this.finalStream;
+                this.queryDefinitions.add(query);
+            }
+        }
+
     }
 
     public void createSiddhiRuntime() {
@@ -72,10 +95,10 @@ public class SiddhiApp {
         runtime.addCallback("outputStream", new StreamCallback() {
             @Override
             public void receive(Event[] events) {
-                for ( int i=0; i<events.length; i++ ) {
-                    Event event = events[i];
-                    SiddhiApp.this.bundle.addItem(event.getData()[0]);
-                }
+            for ( int i=0; i<events.length; i++ ) {
+                Event event = events[i];
+                SiddhiApp.this.bundle.addItem(event.getData()[0]);
+            }
             }
         });
     }
@@ -88,35 +111,40 @@ public class SiddhiApp {
             /*
             Add stream definition and to HashMap for given transform
              */
-            String streamName = SiddhiApp.stringTransform(transform.getFullName()) + "Stream";
+            String streamName = SiddhiApp.generateTransformName(transform.getFullName()) + "Stream";
             String sink = "";
             String stream = sink + "define stream " + streamName + " (event object);";
             this.streamDefinitions.add(stream);
-            this.transformsMap.put(SiddhiApp.stringTransform(transform.getFullName()), transform);
-            this.collectionsMap.put(SiddhiApp.stringTransform(transform.getFullName()), keyCollection);
-            String finalOutputStream = "outputStream";
+            this.transformsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), transform);
+            this.collectionsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), keyCollection);
 
             /*
             Create queries for each transform mapped by output collections
              */
 
+            boolean duplicateQueryFlag = false;
             for ( Iterator transformOuputIterator = transform.getOutputs().values().iterator(); transformOuputIterator.hasNext(); ) {
                 PCollection collection = (PCollection) transformOuputIterator.next();
                 List<AppliedPTransform<?, ?, ?>> transformList = this.graph.getPerElementConsumers(collection);
                 for (Iterator transformListIterator = transformList.iterator(); transformListIterator.hasNext(); ) {
                     AppliedPTransform nextTransform = (AppliedPTransform) transformListIterator.next();
                     String outputStreamName;
-                    if (SiddhiApp.compatibleTransform(nextTransform.getTransform())) {
-                        outputStreamName = SiddhiApp.stringTransform(nextTransform.getFullName()) + "Stream";
+                    if (SiddhiApp.compatibleTransform(nextTransform)) {
+                        outputStreamName = SiddhiApp.generateTransformName(nextTransform.getFullName()) + "Stream";
                     } else {
                         LOG.info("Siddhi does not support " + nextTransform.getTransform().toString() + " at the moment");
+                        if (duplicateQueryFlag == true) {
+                            continue;
+                        } else {
+                            duplicateQueryFlag = true;
+                        }
                         if (this.finalCollection == null) {
                             this.finalCollection = collection;
                         }
-                        outputStreamName = finalOutputStream;
+                        outputStreamName = this.writeStreamName;
                     }
                     if (transform.getTransform() instanceof ParDo.MultiOutput) {
-                        String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
+                        String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
                                 "select event insert into " + outputStreamName + ";";
                         this.queryDefinitions.add(query);
                     }
@@ -142,10 +170,11 @@ public class SiddhiApp {
                         }
                         if (windowTransform.getWindowFn() instanceof GlobalWindows) {
                             query = "from " + streamName + "#window.timeBatch(1 sec) select event insert into " + outputStreamName + ";";
+//                            query = "from " + streamName + " select event insert into " + outputStreamName + ";";
                         }
                         this.queryDefinitions.add(query);
                     }
-                    if (outputStreamName != finalOutputStream) {
+                    if (outputStreamName != this.writeStreamName) {
                         generateSiddhiQueryForTransform(nextTransform, collection);
                     }
                 }
@@ -153,18 +182,21 @@ public class SiddhiApp {
         }
     }
 
-    public static boolean compatibleTransform(PTransform transform) {
-        if (transform instanceof ParDo.MultiOutput) {
+    public static boolean compatibleTransform(AppliedPTransform transform) {
+        if (transform.getTransform() instanceof ParDo.MultiOutput) {
             return true;
         }
-        if (transform instanceof GroupByKey) {
+        if (transform.getTransform() instanceof GroupByKey) {
+            if (transform.getFullName().equals("Writefile/WriteFiles/WriteUnshardedBundlesToTempFiles/GroupUnwritten")) {
+                return false;
+            }
             return true;
         }
-        if (transform instanceof Window.Assign) {
-            if (((Window.Assign) transform).getWindowFn() instanceof FixedWindows) {
+        if (transform.getTransform() instanceof Window.Assign) {
+            if (((Window.Assign) transform.getTransform()).getWindowFn() instanceof FixedWindows) {
                 return true;
             }
-            if (((Window.Assign) transform).getWindowFn() instanceof GlobalWindows) {
+            if (((Window.Assign) transform.getTransform()).getWindowFn() instanceof GlobalWindows) {
                 return true;
             }
         }
@@ -195,7 +227,7 @@ public class SiddhiApp {
         return this.finalCollection;
     }
 
-    public static String stringTransform(String value) {
+    public static String generateTransformName(String value) {
         return value.replace('/', '_').replace('(', '_').replace(")", "").replace('.','_');
     }
 

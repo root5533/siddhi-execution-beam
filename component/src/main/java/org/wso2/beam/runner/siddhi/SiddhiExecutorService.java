@@ -1,14 +1,9 @@
 package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.sdk.runners.AppliedPTransform;
-import org.apache.beam.sdk.util.WindowedValue;
-import org.apache.beam.sdk.values.PCollection;
-import org.apache.beam.sdk.values.PValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -62,13 +57,14 @@ public class SiddhiExecutorService {
                 List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
                 for ( Iterator iter = transforms.iterator(); iter.hasNext(); ) {
                     AppliedPTransform transform = (AppliedPTransform) iter.next();
-                    String inputStream = SiddhiApp.stringTransform(transform.getFullName()) + "Stream";
+                    String inputStream = SiddhiApp.generateTransformName(transform.getFullName()) + "Stream";
                     source.run(executionRuntime.getSiddhiRuntime().getInputHandler(inputStream));
                 }
 
                 /*
                 Finalize output WriteFile
                  */
+                Thread.sleep(3000);
 //                CommittedBundle bundle = executionRuntime.getBundle();
 //                bundle.setPCollection(executionRuntime.getFinalCollection());
 //                if (bundle.getValues().peek() != null) {
@@ -94,7 +90,7 @@ public class SiddhiExecutorService {
 //                } else {
 //                    LOG.info("***No data in bundle to write!***");
 //                }
-                Thread.sleep(3000);
+
                 CommittedBundle bundle = executionRuntime.getBundle();
                 bundle.setPCollection(executionRuntime.getFinalCollection());
                 if (bundle.getValues().peek() != null) {
