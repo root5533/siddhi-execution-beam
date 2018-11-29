@@ -68,7 +68,6 @@ public class DoFnOperator<InputT, OutputT> {
     }
 
     public void processElement(WindowedValue<InputT> element) {
-//        System.out.println("DoFnOperator : processElement() : " + element.getValue().toString());
         try {
             this.delegate.processElement(element);
         } catch (Exception e) {

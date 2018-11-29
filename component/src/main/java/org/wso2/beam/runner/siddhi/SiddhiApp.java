@@ -5,6 +5,7 @@ import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.windowing.FixedWindows;
+import org.apache.beam.sdk.transforms.windowing.GlobalWindows;
 import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.PCollection;
 import org.joda.time.Duration;
@@ -94,9 +95,11 @@ public class SiddhiApp {
             this.transformsMap.put(SiddhiApp.stringTransform(transform.getFullName()), transform);
             this.collectionsMap.put(SiddhiApp.stringTransform(transform.getFullName()), keyCollection);
             String finalOutputStream = "outputStream";
+
             /*
             Create queries for each transform mapped by output collections
              */
+
             for ( Iterator transformOuputIterator = transform.getOutputs().values().iterator(); transformOuputIterator.hasNext(); ) {
                 PCollection collection = (PCollection) transformOuputIterator.next();
                 List<AppliedPTransform<?, ?, ?>> transformList = this.graph.getPerElementConsumers(collection);
@@ -116,13 +119,11 @@ public class SiddhiApp {
                         String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.stringTransform(transform.getFullName()) + "\") " +
                                 "select event insert into " + outputStreamName + ";";
                         this.queryDefinitions.add(query);
-                        generateSiddhiQueryForTransform(nextTransform, collection);
                     }
                     if (transform.getTransform() instanceof GroupByKey) {
                         String query = "from " + streamName + "#beam:groupbykey(event) " +
                                 "select event insert into " + outputStreamName + ";";
                         this.queryDefinitions.add(query);
-                        generateSiddhiQueryForTransform(nextTransform, collection);
                     }
                     if (transform.getTransform() instanceof Window.Assign) {
                         String query = "";
@@ -139,7 +140,12 @@ public class SiddhiApp {
                             }
                             query += " select event insert into " + outputStreamName + ";";
                         }
+                        if (windowTransform.getWindowFn() instanceof GlobalWindows) {
+                            query = "from " + streamName + "#window.timeBatch(1 sec) select event insert into " + outputStreamName + ";";
+                        }
                         this.queryDefinitions.add(query);
+                    }
+                    if (outputStreamName != finalOutputStream) {
                         generateSiddhiQueryForTransform(nextTransform, collection);
                     }
                 }
@@ -156,6 +162,9 @@ public class SiddhiApp {
         }
         if (transform instanceof Window.Assign) {
             if (((Window.Assign) transform).getWindowFn() instanceof FixedWindows) {
+                return true;
+            }
+            if (((Window.Assign) transform).getWindowFn() instanceof GlobalWindows) {
                 return true;
             }
         }

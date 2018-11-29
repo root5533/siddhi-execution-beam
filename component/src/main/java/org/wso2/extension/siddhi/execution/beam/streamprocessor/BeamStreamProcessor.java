@@ -98,8 +98,8 @@ public class BeamStreamProcessor  extends StreamProcessor {
                         this.operator.processElement((WindowedValue) event.getOutputData()[i], complexEventChunk);
                     }
                 }
-                this.operator.finish();
             }
+            this.operator.finish();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {

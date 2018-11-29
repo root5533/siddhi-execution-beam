@@ -21,7 +21,7 @@ public class Windowing
     private interface CSVOptions extends PipelineOptions, StreamingOptions {
 
         @Description("Set input target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/input.csv")
+        @Default.String("/Users/admin/Projects/siddhi-execution-beam/input-large.csv")
         String getInputFile();
         void setInputFile(String value);
 
