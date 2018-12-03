@@ -30,10 +30,6 @@ public class SourceWrapper<OutputT> {
         this.localReaders = new ArrayList<>();
     }
 
-    public boolean isOpen() {
-        return this.isOpen;
-    }
-
     public void open() throws Exception {
         this.isOpen = true;
         for ( int i = 0; i < this.splitSources.size(); i++ ) {
@@ -66,6 +62,7 @@ public class SourceWrapper<OutputT> {
 
     private void emitElement (InputHandler inputHandler, BoundedReader reader) throws Exception {
         WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
+        Thread.sleep(3000);
         inputHandler.send(new Object[]{elem});
     }
 

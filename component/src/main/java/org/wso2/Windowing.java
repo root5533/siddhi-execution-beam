@@ -83,7 +83,7 @@ public class Windowing
 
         Pipeline pipe = Pipeline.create(options);
         pipe.apply("Readfile", TextIO.read().from(options.getInputFile()))
-                .apply(Window.into(FixedWindows.of(Duration.standardSeconds(3))))
+                .apply(Window.into(FixedWindows.of(Duration.standardSeconds(5))))
                 .apply(new CSVFilterRegion())
                 .apply(GroupByKey.<String, String[]>create())
                 .apply(MapElements.via(new FindKeyValueFn()))

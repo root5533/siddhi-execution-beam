@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamStreamProcessor;
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.GroupByKeyProcessor;
+import org.wso2.extension.siddhi.execution.beam.streamprocessor.SourceSinkProcessor;
+import org.wso2.extension.siddhi.io.file.FileSink;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import org.wso2.siddhi.core.event.Event;
@@ -56,23 +58,24 @@ public class SiddhiApp {
         /*
         Create final writeStream siddhi query(hardcoded)
          */
-        for (Iterator iterator = this.graph.getAllPerElementConsumers().asMap().values().iterator(); iterator.hasNext(); ) {
-            List transformList = (List) iterator.next();
-            AppliedPTransform transform = (AppliedPTransform) transformList.get(0);
-            if (transform.getFullName().equals("Writefile/WriteFiles/FinalizeTempFileBundles/Finalize/ParMultiDo(Finalize)")) {
-                String stream = "define stream writeStream (event object);";
-                this.streamDefinitions.add(stream);
-                this.transformsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), transform);
-                for (Iterator iter = transform.getInputs().values().iterator(); iter.hasNext();) {
-                    PCollection collection = (PCollection) iter.next();
-                    this.collectionsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), collection);
-                    break;
-                }
-                String query = "from " + this.writeStreamName + "#beam:execute(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
-                        "select event insert into " + this.finalStream;
-                this.queryDefinitions.add(query);
-            }
-        }
+//        for (Iterator iterator = this.graph.getAllPerElementConsumers().asMap().values().iterator(); iterator.hasNext(); ) {
+//            List transformList = (List) iterator.next();
+//            AppliedPTransform transform = (AppliedPTransform) transformList.get(0);
+//            if (transform.getFullName().equals("Writefile/WriteFiles/FinalizeTempFileBundles/Finalize/ParMultiDo(Finalize)")) {
+//                String stream = "define stream writeStream (event object);";
+//                this.streamDefinitions.add(stream);
+//                this.transformsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), transform);
+//                for (Iterator iter = transform.getInputs().values().iterator(); iter.hasNext();) {
+//                    PCollection collection = (PCollection) iter.next();
+//                    this.collectionsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), collection);
+//                    break;
+//                }
+//                String query = "from " + this.writeStreamName + "#beam:execute(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
+//                        "select event insert into " + this.finalStream;
+//                this.queryDefinitions.add(query);
+//            }
+//        }
+        generateSinkQuery("text");
 
     }
 
@@ -90,6 +93,8 @@ public class SiddhiApp {
         System.out.println(streams + queries);
         siddhiManager.setExtension("beam:execute", BeamStreamProcessor.class);
         siddhiManager.setExtension("beam:groupbykey", GroupByKeyProcessor.class);
+        siddhiManager.setExtension("beam:sourcesink", SourceSinkProcessor.class);
+//        siddhiManager.setSinkHandlerManager(FileSink.class);
         this.runtime = siddhiManager.createSiddhiAppRuntime(streams + queries);
 
         runtime.addCallback("outputStream", new StreamCallback() {
@@ -205,6 +210,26 @@ public class SiddhiApp {
 
     public void setBundle(CommittedBundle bundle) {
         this.bundle = bundle;
+    }
+
+    private void generateSinkQuery(String sinkType) {
+        if (sinkType.equals("text")) {
+            /*
+            Extract string value from WindowedValue object and pass to sink stream
+             */
+            String sinkStreamName = "textSinkStream";
+            String stream = "define stream " + this.writeStreamName + " (event object);";
+            this.streamDefinitions.add(stream);
+            String query = "from " + this.writeStreamName + "#beam:sourcesink(event, \"sink\") select event insert into " + sinkStreamName + ";";
+            this.queryDefinitions.add(query);
+
+            /*
+            Define sink query
+             */
+            String sink = "@sink(type='file', file.uri='/Users/admin/Desktop/fileio.txt', append='true', @map(type='text', @payload('{{value}}') ))";
+            String textSinkStream = sink + " define stream " + sinkStreamName + " (value string);";
+            this.streamDefinitions.add(textSinkStream);
+        }
     }
 
     public CommittedBundle getBundle() {
