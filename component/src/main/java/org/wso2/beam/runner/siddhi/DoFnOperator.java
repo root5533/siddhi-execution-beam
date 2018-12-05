@@ -68,7 +68,6 @@ public class DoFnOperator<InputT, OutputT> {
     }
 
     public void processElement(WindowedValue<InputT> element) {
-//        System.out.println("DoFnOperator : processElement() : " + element.getValue().toString());
         try {
             this.delegate.processElement(element);
         } catch (Exception e) {
@@ -80,7 +79,6 @@ public class DoFnOperator<InputT, OutputT> {
 
         @Override
         public <T> void output(TupleTag<T> tag, WindowedValue<T> output) {
-            System.out.println("DoFnOperator : BundleOutputManager : output() : " + output.getValue().toString());
             DoFnOperator.this.outputBundle.addItem(output);
         }
     }

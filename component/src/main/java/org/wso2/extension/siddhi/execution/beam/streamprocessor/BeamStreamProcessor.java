@@ -1,11 +1,15 @@
 package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 
+import org.apache.beam.sdk.io.FileBasedSink;
 import org.apache.beam.sdk.runners.AppliedPTransform;
+import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.beam.runner.siddhi.ExecutionContext;
+import org.wso2.beam.runner.siddhi.GroupDoFnOperator;
 import org.wso2.beam.runner.siddhi.SiddhiDoFnOperator;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -80,6 +84,8 @@ public class BeamStreamProcessor  extends StreamProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(BeamStreamProcessor.class);
     private String beamTransform;
     private SiddhiDoFnOperator operator;
+    private boolean fileWriteFlag = false;
+    private ArrayList<FileBasedSink.FileResult> fileResultArray = new ArrayList<>();
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
@@ -90,13 +96,23 @@ public class BeamStreamProcessor  extends StreamProcessor {
         try {
             while (streamEventChunk.hasNext()) {
                 StreamEvent event = streamEventChunk.next();
-                for (int i=0; i<event.getOutputData().length; i++) {
-                    if (event.getOutputData()[i] instanceof WindowedValue) {
-                        this.operator.processElement((WindowedValue) event.getOutputData()[i], complexEventChunk);
+                if (((WindowedValue) event.getOutputData()[0]).getValue() instanceof FileBasedSink.FileResult) {
+                    this.fileWriteFlag = true;
+                    fileResultArray.add((FileBasedSink.FileResult) ((WindowedValue) event.getOutputData()[0]).getValue());
+                } else {
+                    for (int i = 0; i < event.getOutputData().length; i++) {
+                        if (event.getOutputData()[i] instanceof WindowedValue) {
+                            this.operator.processElement((WindowedValue) event.getOutputData()[i], complexEventChunk);
+                        }
                     }
                 }
-                this.operator.finish();
             }
+            if (this.fileWriteFlag == true) {
+                WindowedValue newElement = WindowedValue.valueInGlobalWindow(this.fileResultArray);
+                this.operator.processElement(newElement, complexEventChunk);
+                this.fileResultArray.clear();
+            }
+            this.operator.finish();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -132,7 +148,8 @@ public class BeamStreamProcessor  extends StreamProcessor {
                 ExecutionContext context = ExecutionContext.getContext();
                 AppliedPTransform transform = context.getTransfromFromName(this.beamTransform);
                 PCollection collection = context.getCollectionFromName(this.beamTransform);
-                SiddhiDoFnOperator operator = new SiddhiDoFnOperator(transform, collection);
+                SiddhiDoFnOperator operator;
+                operator = new SiddhiDoFnOperator(transform, collection);
                 operator.createRunner();
                 operator.start();
                 this.operator = operator;

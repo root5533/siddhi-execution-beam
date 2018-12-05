@@ -10,24 +10,30 @@ import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
 import org.apache.beam.sdk.util.WindowedValue;
-import org.apache.beam.sdk.values.PCollection;
-import org.apache.beam.sdk.values.PCollectionView;
-import org.apache.beam.sdk.values.TupleTag;
-import org.apache.beam.sdk.values.WindowingStrategy;
+import org.apache.beam.sdk.values.*;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class SiddhiDoFnOperator<InputT, OutputT> {
 
-    private final AppliedPTransform<?, ?, ?> transform;
-    private DoFnRunner<InputT, OutputT> delegate;
-    private PCollection collection;
-    private ComplexEventChunk complexEventChunk;
+    protected final AppliedPTransform<?, ?, ?> transform;
+    protected DoFnRunner<InputT, OutputT> delegate;
+    protected PCollection collection;
+    protected ComplexEventChunk complexEventChunk;
+    protected PipelineOptions options;
+    protected SideInputReader sideInputReader;
+    protected OutputManager outputManager;
+    protected TupleTag<OutputT> mainOutputTag;
+    protected List<TupleTag<?>> additionalOutputTags;
+    protected StepContext stepContext;
+    protected Coder<InputT> inputCoder;
+    protected Map<TupleTag<?>, Coder<?>> outputCoders;
+    protected WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy;
+    protected DoFn<InputT, OutputT> fn;
 
     public SiddhiDoFnOperator(AppliedPTransform transform, PCollection collection) {
         this.transform = transform;
@@ -35,20 +41,20 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
     }
 
     public void createRunner() throws Exception {
-        PipelineOptions options = this.transform.getPipeline().getOptions();
-        DoFn<InputT, OutputT> fn = ((ParDo.MultiOutput) this.transform.getTransform()).getFn();
-        SideInputReader sideInputReader = SiddhiDoFnOperator.LocalSideInputReader.create(ParDoTranslation.getSideInputs(this.transform));
-        OutputManager outputManager = new SiddhiDoFnOperator.BundleOutputManager();
-        TupleTag<OutputT> mainOutputTag = (TupleTag<OutputT>) ParDoTranslation.getMainOutputTag(this.transform);
-        List<TupleTag<?>> additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
-        StepContext stepContext = SiddhiDoFnOperator.LocalStepContext.create();
-        Coder<InputT> inputCoder = this.collection.getCoder();
-        Map<TupleTag<?>, Coder<?>> outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
+        this.options = this.transform.getPipeline().getOptions();
+        this.sideInputReader = SiddhiDoFnOperator.LocalSideInputReader.create(ParDoTranslation.getSideInputs(this.transform));
+        this.outputManager = new SiddhiDoFnOperator.BundleOutputManager();
+        this.mainOutputTag = (TupleTag<OutputT>) ParDoTranslation.getMainOutputTag(this.transform);
+        this.additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
+        this.stepContext = SiddhiDoFnOperator.LocalStepContext.create();
+        this.inputCoder = this.collection.getCoder();
+        this.outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
             return (TupleTag)e.getKey();
         }, (e) -> {
             return ((PCollection)e.getValue()).getCoder();
         }));
-        WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy = this.collection.getWindowingStrategy();
+        this.windowingStrategy = this.collection.getWindowingStrategy();
+        this.fn = this.getDoFn();
         this.delegate = new SimpleDoFnRunner(options, fn, sideInputReader, outputManager, mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);
     }
 
@@ -69,7 +75,11 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
         }
     }
 
-    private class BundleOutputManager implements OutputManager {
+    private DoFn getDoFn() {
+        return ((ParDo.MultiOutput) this.transform.getTransform()).getFn();
+    }
+
+    protected class BundleOutputManager implements OutputManager {
 
         @Override
         public <T> void output(TupleTag<T> tag, WindowedValue<T> output) {
@@ -83,7 +93,7 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
         }
     }
 
-    private static class LocalStepContext implements StepContext {
+    protected static class LocalStepContext implements StepContext {
 
         public static SiddhiDoFnOperator.LocalStepContext create() {
             return new SiddhiDoFnOperator.LocalStepContext();
@@ -102,7 +112,7 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
         }
     }
 
-    private static class LocalSideInputReader implements SideInputReader {
+    protected static class LocalSideInputReader implements SideInputReader {
 
         public static LocalSideInputReader create(List<PCollectionView<?>> sideInputReader) {
             return new LocalSideInputReader();

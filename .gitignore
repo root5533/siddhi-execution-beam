@@ -1,1 +1,5 @@
 outputs/
+**/component/target/
+input-large.csv
+input.csv
+.idea/workspace.xml

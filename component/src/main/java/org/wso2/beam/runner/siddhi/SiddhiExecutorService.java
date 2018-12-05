@@ -1,14 +1,9 @@
 package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.sdk.runners.AppliedPTransform;
-import org.apache.beam.sdk.util.WindowedValue;
-import org.apache.beam.sdk.values.PCollection;
-import org.apache.beam.sdk.values.PValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.siddhi.core.SiddhiAppRuntime;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -62,38 +57,48 @@ public class SiddhiExecutorService {
                 List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
                 for ( Iterator iter = transforms.iterator(); iter.hasNext(); ) {
                     AppliedPTransform transform = (AppliedPTransform) iter.next();
-                    String inputStream = transform.getFullName().replace('/', '_').replace('(', '_').replace(")", "") + "Stream";
+                    String inputStream = SiddhiApp.generateTransformName(transform.getFullName()) + "Stream";
                     source.run(executionRuntime.getSiddhiRuntime().getInputHandler(inputStream));
                 }
 
                 /*
                 Finalize output WriteFile
                  */
+                Thread.sleep(3000);
+//                CommittedBundle bundle = executionRuntime.getBundle();
+//                bundle.setPCollection(executionRuntime.getFinalCollection());
+//                if (bundle.getValues().peek() != null) {
+//                    for (Iterator iter = graph.getAllPerElementConsumers().asMap().values().iterator(); iter.hasNext(); ) {
+//                        List transformList = (List) iter.next();
+//                        AppliedPTransform transform = (AppliedPTransform) transformList.get(0);
+//                        if (transform.getFullName().equals("Writefile/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles")) {
+//                            WriteEvaluator eval = new WriteEvaluator(transform, bundle, context);
+//                            eval.execute();
+//                            for (Iterator iterator = graph.getAllPerElementConsumers().asMap().values().iterator(); iterator.hasNext(); ) {
+//                                transformList = (List) iterator.next();
+//                                transform = (AppliedPTransform) transformList.get(0);
+//                                if (transform.getFullName().equals("Writefile/WriteFiles/FinalizeTempFileBundles/Finalize/ParMultiDo(Finalize)")) {
+//                                    bundle = context.getFinalBundle();
+//                                    eval = new WriteEvaluator(transform, bundle, context);
+//                                    eval.execute();
+//                                    break;
+//                                }
+//                            }
+//                            break;
+//                        }
+//                    }
+//                } else {
+//                    LOG.info("***No data in bundle to write!***");
+//                }
+
                 CommittedBundle bundle = executionRuntime.getBundle();
                 bundle.setPCollection(executionRuntime.getFinalCollection());
                 if (bundle.getValues().peek() != null) {
-                    for (Iterator iter = graph.getAllPerElementConsumers().asMap().values().iterator(); iter.hasNext(); ) {
-                        List transformList = (List) iter.next();
-                        AppliedPTransform transform = (AppliedPTransform) transformList.get(0);
-                        if (transform.getFullName().equals("Writefile/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles")) {
-                            WriteEvaluator eval = new WriteEvaluator(transform, bundle, context);
-                            eval.execute();
-                            for (Iterator iterator = graph.getAllPerElementConsumers().asMap().values().iterator(); iterator.hasNext(); ) {
-                                transformList = (List) iterator.next();
-                                transform = (AppliedPTransform) transformList.get(0);
-                                if (transform.getFullName().equals("Writefile/WriteFiles/FinalizeTempFileBundles/Finalize/ParMultiDo(Finalize)")) {
-                                    bundle = context.getFinalBundle();
-                                    eval = new WriteEvaluator(transform, bundle, context);
-                                    eval.execute();
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                    }
+                    LOG.info("***Data in bundle to write!***");
+                } else {
+                    LOG.info("***No data in bundle to write!***");
                 }
             }
-
             LOG.info("Siddhi Runner Complete");
         } catch (Exception e) {
             e.printStackTrace();
