@@ -5,6 +5,8 @@ import com.google.common.collect.ListMultimap;
 import org.apache.beam.runners.core.construction.TransformInputs;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.Read;
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.io.WriteFiles;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.runners.TransformHierarchy.Node;
 import org.apache.beam.sdk.values.PCollection;
@@ -27,8 +29,25 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
     private int depth;
 
     public CompositeBehavior enterCompositeTransform(Node node) {
-        ++this.depth;
+        if (node.getTransform() instanceof TextIO.Write) {
+            AppliedPTransform<?, ?, ?> appliedPTransform = this.getAppliedTransform(node);
+            this.stepNames.put(appliedPTransform, this.genStepName());
+            Collection<PValue> mainInputs = TransformInputs.nonAdditionalInputs(node.toAppliedPTransform(this.getPipeline()));
+            Iterator iter = mainInputs.iterator();
+            PValue value;
+            while(iter.hasNext()) {
+                value = (PValue) iter.next();
+                this.perElementConsumers.put(value, appliedPTransform);
+            }
+            iter = node.getInputs().values().iterator();
+            while(iter.hasNext()) {
+                value = (PValue) iter.next();
+                this.allConsumers.put(value, appliedPTransform);
+            }
+            return CompositeBehavior.DO_NOT_ENTER_TRANSFORM;
+        }
 //        LOG.info("{} enterCompositeTransform- {}", genSpaces(this.depth), node.getFullName());
+        ++this.depth;
         return CompositeBehavior.ENTER_TRANSFORM;
     }
 

@@ -62,7 +62,7 @@ public class SourceWrapper<OutputT> {
 
     private void emitElement (InputHandler inputHandler, BoundedReader reader) throws Exception {
         WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-        Thread.sleep(3000);
+//        Thread.sleep(3000);
         inputHandler.send(new Object[]{elem});
     }
 

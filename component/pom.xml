@@ -12,6 +12,10 @@
     <packaging>bundle</packaging>
     <name>Siddhi execution of Beam</name>
 
+    <properties>
+        <beam.version>2.8.0</beam.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.wso2.siddhi</groupId>
@@ -30,17 +34,17 @@
         <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-sdks-java-core</artifactId>
-            <version>2.6.0</version>
+            <version>${beam.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-runners-core-construction-java</artifactId>
-            <version>2.6.0</version>
+            <version>${beam.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.beam</groupId>
             <artifactId>beam-runners-core-java</artifactId>
-            <version>2.6.0</version>
+            <version>${beam.version}</version>
         </dependency>
 
         <dependency>
@@ -53,6 +57,12 @@
             <groupId>org.wso2.extension.siddhi.io.file</groupId>
             <artifactId>siddhi-io-file</artifactId>
             <version>1.0.14</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.wso2.extension.siddhi.map.text</groupId>
+            <artifactId>siddhi-map-text</artifactId>
+            <version>1.0.22</version>
         </dependency>
 
     </dependencies>
@@ -140,6 +150,13 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
         </plugins>
     </build>

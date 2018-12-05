@@ -38,7 +38,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.testng:testng:6.11" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: com.beust:jcommander:1.64" level="project" />
     <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.17" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-core:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-sdks-java-core:2.8.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.9.5" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.9.5" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-databind:2.9.5" level="project" />
@@ -50,13 +50,13 @@
     <orderEntry type="library" name="Maven: org.apache.commons:commons-compress:1.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.xerial.snappy:snappy-java:1.1.4" level="project" />
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.4" level="project" />
-    <orderEntry type="library" name="Maven: org.tukaani:xz:1.5" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-core-construction-java:2.6.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-model-pipeline:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.tukaani:xz:1.8" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-core-construction-java:2.8.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-model-pipeline:2.8.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.errorprone:error_prone_annotations:2.1.2" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-model-job-management:2.6.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-core-java:2.6.0" level="project" />
-    <orderEntry type="library" name="Maven: org.apache.beam:beam-model-fn-execution:2.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-model-job-management:2.8.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-runners-core-java:2.8.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.beam:beam-model-fn-execution:2.8.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-collections4:4.1" level="project" />
     <orderEntry type="library" name="Maven: org.wso2.extension.siddhi.io.file:siddhi-io-file:1.0.14" level="project" />
     <orderEntry type="library" name="Maven: org.wso2.transport.file:org.wso2.transport.file:6.0.52" level="project" />
@@ -98,5 +98,6 @@
     <orderEntry type="library" name="Maven: commons-io.wso2:commons-io:2.4.0.wso2v1" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons.wso2:commons-vfs2:2.0-wso2v15" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.5" level="project" />
+    <orderEntry type="library" name="Maven: org.wso2.extension.siddhi.map.text:siddhi-map-text:1.0.22" level="project" />
   </component>
 </module>

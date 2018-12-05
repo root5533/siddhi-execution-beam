@@ -1,5 +1,8 @@
 package org.wso2.beam.runner.siddhi;
 
+import org.apache.beam.sdk.io.TextIO;
+import org.apache.beam.sdk.io.WriteFiles;
+import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.ParDo;
@@ -13,13 +16,10 @@ import org.slf4j.LoggerFactory;
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamStreamProcessor;
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.GroupByKeyProcessor;
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.SourceSinkProcessor;
-import org.wso2.extension.siddhi.io.file.FileSink;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
-import org.wso2.siddhi.core.event.Event;
-import org.wso2.siddhi.core.stream.output.StreamCallback;
-
 import java.util.*;
+import java.lang.reflect.Method;
 
 public class SiddhiApp {
 
@@ -33,7 +33,7 @@ public class SiddhiApp {
     private DirectGraph graph;
     private PCollection finalCollection;
     private String writeStreamName = "writeStream";
-    private String finalStream = "outputStream";
+//    private String finalStream = "outputStream";
 
     public SiddhiApp() { }
 
@@ -75,7 +75,7 @@ public class SiddhiApp {
 //                this.queryDefinitions.add(query);
 //            }
 //        }
-        generateSinkQuery("text");
+//        generateSinkQuery("text");
 
     }
 
@@ -94,18 +94,17 @@ public class SiddhiApp {
         siddhiManager.setExtension("beam:execute", BeamStreamProcessor.class);
         siddhiManager.setExtension("beam:groupbykey", GroupByKeyProcessor.class);
         siddhiManager.setExtension("beam:sourcesink", SourceSinkProcessor.class);
-//        siddhiManager.setSinkHandlerManager(FileSink.class);
         this.runtime = siddhiManager.createSiddhiAppRuntime(streams + queries);
 
-        runtime.addCallback("outputStream", new StreamCallback() {
-            @Override
-            public void receive(Event[] events) {
-            for ( int i=0; i<events.length; i++ ) {
-                Event event = events[i];
-                SiddhiApp.this.bundle.addItem(event.getData()[0]);
-            }
-            }
-        });
+//        runtime.addCallback("outputStream", new StreamCallback() {
+//            @Override
+//            public void receive(Event[] events) {
+//            for ( int i=0; i<events.length; i++ ) {
+//                Event event = events[i];
+//                SiddhiApp.this.bundle.addItem(event.getData()[0]);
+//            }
+//            }
+//        });
     }
 
     private void generateSiddhiQueryForTransform(AppliedPTransform transform, PCollection keyCollection) {
@@ -126,61 +125,74 @@ public class SiddhiApp {
             /*
             Create queries for each transform mapped by output collections
              */
-
             boolean duplicateQueryFlag = false;
-            for ( Iterator transformOuputIterator = transform.getOutputs().values().iterator(); transformOuputIterator.hasNext(); ) {
-                PCollection collection = (PCollection) transformOuputIterator.next();
-                List<AppliedPTransform<?, ?, ?>> transformList = this.graph.getPerElementConsumers(collection);
-                for (Iterator transformListIterator = transformList.iterator(); transformListIterator.hasNext(); ) {
-                    AppliedPTransform nextTransform = (AppliedPTransform) transformListIterator.next();
-                    String outputStreamName;
-                    if (SiddhiApp.compatibleTransform(nextTransform)) {
-                        outputStreamName = SiddhiApp.generateTransformName(nextTransform.getFullName()) + "Stream";
-                    } else {
-                        LOG.info("Siddhi does not support " + nextTransform.getTransform().toString() + " at the moment");
-                        if (duplicateQueryFlag == true) {
-                            continue;
+            if (transform.getTransform() instanceof TextIO.Write) {
+                try {
+                    TextIO.TypedWrite textio = ((TextIO.Write) transform.getTransform()).withOutputFilenames();
+                    Class cls = textio.getClass();
+                    Method getFileNamePrefix = cls.getDeclaredMethod("getFilenamePrefix");
+                    getFileNamePrefix.setAccessible(true);
+                    ValueProvider.StaticValueProvider provider = (ValueProvider.StaticValueProvider) getFileNamePrefix.invoke(textio);
+                    String filePath = provider.get().toString();
+                    generateSinkQuery("text", streamName, filePath, false);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                for (Iterator transformOuputIterator = transform.getOutputs().values().iterator(); transformOuputIterator.hasNext(); ) {
+                    PCollection collection = (PCollection) transformOuputIterator.next();
+                    List<AppliedPTransform<?, ?, ?>> transformList = this.graph.getPerElementConsumers(collection);
+                    for (Iterator transformListIterator = transformList.iterator(); transformListIterator.hasNext(); ) {
+                        AppliedPTransform nextTransform = (AppliedPTransform) transformListIterator.next();
+                        String outputStreamName;
+                        if (SiddhiApp.compatibleTransform(nextTransform)) {
+                            outputStreamName = SiddhiApp.generateTransformName(nextTransform.getFullName()) + "Stream";
                         } else {
-                            duplicateQueryFlag = true;
-                        }
-                        if (this.finalCollection == null) {
-                            this.finalCollection = collection;
-                        }
-                        outputStreamName = this.writeStreamName;
-                    }
-                    if (transform.getTransform() instanceof ParDo.MultiOutput) {
-                        String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
-                                "select event insert into " + outputStreamName + ";";
-                        this.queryDefinitions.add(query);
-                    }
-                    if (transform.getTransform() instanceof GroupByKey) {
-                        String query = "from " + streamName + "#beam:groupbykey(event) " +
-                                "select event insert into " + outputStreamName + ";";
-                        this.queryDefinitions.add(query);
-                    }
-                    if (transform.getTransform() instanceof Window.Assign) {
-                        String query = "";
-                        Window.Assign windowTransform = (Window.Assign) transform.getTransform();
-                        if (windowTransform.getWindowFn() instanceof FixedWindows) {
-                            FixedWindows fixedWindow = (FixedWindows) windowTransform.getWindowFn();
-                            Duration size = fixedWindow.getSize();
-                            Duration offSet = fixedWindow.getOffset();
-                            query += "from " + streamName + "#window.timeBatch(" + size.getStandardSeconds() + " sec";
-                            if (offSet == Duration.ZERO) {
-                                query += ")";
+                            LOG.info("Siddhi does not support " + nextTransform.getTransform().toString() + " at the moment");
+                            if (duplicateQueryFlag == true) {
+                                continue;
                             } else {
-                                query += ", " + offSet.getStandardSeconds() + " sec)";
+                                duplicateQueryFlag = true;
                             }
-                            query += " select event insert into " + outputStreamName + ";";
+                            if (this.finalCollection == null) {
+                                this.finalCollection = collection;
+                            }
+                            outputStreamName = this.writeStreamName;
                         }
-                        if (windowTransform.getWindowFn() instanceof GlobalWindows) {
-                            query = "from " + streamName + "#window.timeBatch(1 sec) select event insert into " + outputStreamName + ";";
-//                            query = "from " + streamName + " select event insert into " + outputStreamName + ";";
+                        if (transform.getTransform() instanceof ParDo.MultiOutput) {
+                            String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
+                                    "select event insert into " + outputStreamName + ";";
+                            this.queryDefinitions.add(query);
                         }
-                        this.queryDefinitions.add(query);
-                    }
-                    if (outputStreamName != this.writeStreamName) {
-                        generateSiddhiQueryForTransform(nextTransform, collection);
+                        if (transform.getTransform() instanceof GroupByKey) {
+                            String query = "from " + streamName + "#beam:groupbykey(event) " +
+                                    "select event insert into " + outputStreamName + ";";
+                            this.queryDefinitions.add(query);
+                        }
+                        if (transform.getTransform() instanceof Window.Assign) {
+                            String query = "";
+                            Window.Assign windowTransform = (Window.Assign) transform.getTransform();
+                            if (windowTransform.getWindowFn() instanceof FixedWindows) {
+                                FixedWindows fixedWindow = (FixedWindows) windowTransform.getWindowFn();
+                                Duration size = fixedWindow.getSize();
+                                Duration offSet = fixedWindow.getOffset();
+                                query += "from " + streamName + "#window.timeBatch(" + size.getStandardSeconds() + " sec";
+                                if (offSet == Duration.ZERO) {
+                                    query += ")";
+                                } else {
+                                    query += ", " + offSet.getStandardSeconds() + " sec)";
+                                }
+                                query += " select event insert into " + outputStreamName + ";";
+                            }
+                            if (windowTransform.getWindowFn() instanceof GlobalWindows) {
+                                query = "from " + streamName + "#window.timeBatch(1 sec) select event insert into " + outputStreamName + ";";
+                                //                            query = "from " + streamName + " select event insert into " + outputStreamName + ";";
+                            }
+                            this.queryDefinitions.add(query);
+                        }
+                        if (outputStreamName != this.writeStreamName) {
+                            generateSiddhiQueryForTransform(nextTransform, collection);
+                        }
                     }
                 }
             }
@@ -189,6 +201,9 @@ public class SiddhiApp {
 
     public static boolean compatibleTransform(AppliedPTransform transform) {
         if (transform.getTransform() instanceof ParDo.MultiOutput) {
+            if (transform.getFullName().equals("Writefile/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles")) {
+                return false;
+            }
             return true;
         }
         if (transform.getTransform() instanceof GroupByKey) {
@@ -205,6 +220,9 @@ public class SiddhiApp {
                 return true;
             }
         }
+        if (transform.getTransform() instanceof TextIO.Write) {
+            return true;
+        }
         return false;
     }
 
@@ -212,23 +230,23 @@ public class SiddhiApp {
         this.bundle = bundle;
     }
 
-    private void generateSinkQuery(String sinkType) {
+    private void generateSinkQuery(String sinkType, String streamName, String filePath, boolean windowedWrite) {
         if (sinkType.equals("text")) {
             /*
             Extract string value from WindowedValue object and pass to sink stream
              */
             String sinkStreamName = "textSinkStream";
-            String stream = "define stream " + this.writeStreamName + " (event object);";
-            this.streamDefinitions.add(stream);
-            String query = "from " + this.writeStreamName + "#beam:sourcesink(event, \"sink\") select event insert into " + sinkStreamName + ";";
+            String query = "from " + streamName + "#beam:sourcesink(event) select value insert into " + sinkStreamName + ";";
             this.queryDefinitions.add(query);
 
             /*
             Define sink query
              */
-            String sink = "@sink(type='file', file.uri='/Users/admin/Desktop/fileio.txt', append='true', @map(type='text', @payload('{{value}}') ))";
-            String textSinkStream = sink + " define stream " + sinkStreamName + " (value string);";
-            this.streamDefinitions.add(textSinkStream);
+            if (windowedWrite == false) {
+                String sink = "@sink(type='file', file.uri='" + filePath + "', append='true', @map(type='text', @payload('{{value}}') ))";
+                String textSinkStream = sink + " define stream " + sinkStreamName + " (value string);";
+                this.streamDefinitions.add(textSinkStream);
+            }
         }
     }
 

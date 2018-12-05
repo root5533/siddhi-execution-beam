@@ -73,65 +73,29 @@ import java.util.*;
 public class SourceSinkProcessor<V> extends StreamProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(SourceSinkProcessor.class);
-    private String type;
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        if (this.type.equals("sink")) {
-            LOG.info("Transforming object to process in sink stream");
-            ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
-            try {
-                while(streamEventChunk.hasNext()) {
-                    StreamEvent event = streamEventChunk.next();
-                    for (int i=0; i<event.getOutputData().length; i++) {
-                        WindowedValue element = (WindowedValue) event.getOutputData()[i];
-                        V newValue = (V) element.getValue();
-                        StreamEvent streamEvent = new StreamEvent(0,0,1);
-                        streamEvent.setOutputData(newValue, 0);
-                        complexEventChunk.add(streamEvent);
-                    }
+        LOG.info("Transforming object to process in sink stream");
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+        try {
+            while(streamEventChunk.hasNext()) {
+                StreamEvent event = streamEventChunk.next();
+                for (int i = 0; i < event.getBeforeWindowData().length; i++) {
+                    WindowedValue element = (WindowedValue) event.getBeforeWindowData()[i];
+                    String newValue = (String) element.getValue();
+                    Object[] outputObject = {newValue};
+                    StreamEvent streamEvent = new StreamEvent(0, 0, 1);
+                    streamEvent.setOutputData(outputObject);
+                    complexEventChunk.add(streamEvent);
                 }
-                nextProcessor.process(complexEventChunk);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+            nextProcessor.process(complexEventChunk);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-//        LOG.info("Grouping elements >>>><<<<");
-//        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
-//        try {
-//            while (streamEventChunk.hasNext()) {
-//                StreamEvent event = streamEventChunk.next();
-//                for (int i=0; i<event.getOutputData().length; i++) {
-//                    if (event.getOutputData()[i] instanceof WindowedValue) {
-//                        KV element = (KV) ((WindowedValue) event.getOutputData()[i]).getValue();
-//                        if (this.groupByKey.containsKey(element.getKey())) {
-//                            ArrayList<V> items = this.groupByKey.get(element.getKey());
-//                            items.add((V) element.getValue());
-//                            this.groupByKey.put((K) element.getKey(), items);
-//                        } else {
-//                            ArrayList<V> item = new ArrayList<>();
-//                            item.add((V) element.getValue());
-//                            this.groupByKey.put((K) element.getKey(), item);
-//                        }
-//                    }
-//                }
-//            }
-//            for (Iterator iter = this.groupByKey.entrySet().iterator(); iter.hasNext();) {
-//                 Map.Entry map = (Map.Entry) iter.next();
-//                 K key = (K) map.getKey();
-//                 ArrayList<V> value = (ArrayList<V>) map.getValue();
-//                 KV kv = KV.of(key, value);
-//                 StreamEvent streamEvent = new StreamEvent(0,0,1);
-//                 streamEvent.setOutputData(WindowedValue.valueInGlobalWindow(kv), 0);
-//                 complexEventChunk.add(streamEvent);
-//            }
-//            nextProcessor.process(complexEventChunk);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
 
     }
 
@@ -142,26 +106,17 @@ public class SourceSinkProcessor<V> extends StreamProcessor {
                                    SiddhiAppContext siddhiAppContext) {
 
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+//        attributes.add(new Attribute("event", Attribute.Type.OBJECT));
 
-        if (attributeExpressionLength != 2) {
-            throw new SiddhiAppCreationException("Only 2 parameters can be specified for SourceSinkProcessor");
-        }
-
-        if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.STRING) {
-
-            try {
-                if (((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue().equals("sink")) {
-                    this.type = "sink";
-                    LOG.info("SourceSinkProcessor initialized for sink transform");
-                } else {
-                    this.type = "source";
-                    LOG.info("SourceSinkProcessor initialized for source transform");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        if (attributeExpressionLength != 1) {
+            throw new SiddhiAppCreationException("Only 1 parameters can be specified for SourceSinkProcessor");
         } else {
-            throw new SiddhiAppCreationException("Second parameter must be of type String to identify source or sink");
+            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
+                attributes.add(new Attribute("value", Attribute.Type.STRING));
+            }
+//            } else {
+//                attributes.add(new Attribute("newValue", Attribute.Type.OBJECT));
+//            }
         }
 
         return attributes;

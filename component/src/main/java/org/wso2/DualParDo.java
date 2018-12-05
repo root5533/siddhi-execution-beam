@@ -2,10 +2,7 @@ package org.wso2;
 
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
-import org.apache.beam.sdk.options.Default;
-import org.apache.beam.sdk.options.Description;
-import org.apache.beam.sdk.options.PipelineOptionsFactory;
-import org.apache.beam.sdk.options.StreamingOptions;
+import org.apache.beam.sdk.options.*;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
@@ -15,7 +12,7 @@ public class DualParDo {
 
     private interface SiddhiOptions extends SiddhiPipelineOptions, StreamingOptions {
         @Description("Set input target")
-        @Default.String("/siddhi-beam.txt")
+        @Validation.Required
         String getInputFile();
         void setInputFile(String value);
 
