@@ -101,13 +101,13 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
 
         @Override
         public StateInternals stateInternals() {
-            System.out.println("DoFnOperator : LocalStepContext : stateInternals()");
+//            System.out.println("DoFnOperator : LocalStepContext : stateInternals()");
             return null;
         }
 
         @Override
         public TimerInternals timerInternals() {
-            System.out.println("DoFnOperator : LocalStepContext : timerInternals()");
+//            System.out.println("DoFnOperator : LocalStepContext : timerInternals()");
             return null;
         }
     }
@@ -120,13 +120,13 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
 
         @Override
         public <T> T get(PCollectionView<T> view, BoundedWindow window) {
-            System.out.println("DoFnOperator : LocalSideInputReader : get()");
+//            System.out.println("DoFnOperator : LocalSideInputReader : get()");
             return null;
         }
 
         @Override
         public <T> boolean contains(PCollectionView<T> view) {
-            System.out.println("DoFnOperator : LocalSideInputReader : contains()");
+//            System.out.println("DoFnOperator : LocalSideInputReader : contains()");
             return false;
         }
 

@@ -1,7 +1,6 @@
 package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.sdk.io.TextIO;
-import org.apache.beam.sdk.io.WriteFiles;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.transforms.GroupByKey;
@@ -33,7 +32,6 @@ public class SiddhiApp {
     private DirectGraph graph;
     private PCollection finalCollection;
     private String writeStreamName = "writeStream";
-//    private String finalStream = "outputStream";
 
     public SiddhiApp() { }
 
@@ -126,17 +124,19 @@ public class SiddhiApp {
             Create queries for each transform mapped by output collections
              */
             boolean duplicateQueryFlag = false;
-            if (transform.getTransform() instanceof TextIO.Write) {
-                try {
-                    TextIO.TypedWrite textio = ((TextIO.Write) transform.getTransform()).withOutputFilenames();
-                    Class cls = textio.getClass();
-                    Method getFileNamePrefix = cls.getDeclaredMethod("getFilenamePrefix");
-                    getFileNamePrefix.setAccessible(true);
-                    ValueProvider.StaticValueProvider provider = (ValueProvider.StaticValueProvider) getFileNamePrefix.invoke(textio);
-                    String filePath = provider.get().toString();
-                    generateSinkQuery("text", streamName, filePath, false);
-                } catch (Exception e) {
-                    e.printStackTrace();
+            if (transform.getOutputs().isEmpty() == true) {
+                if (transform.getTransform() instanceof TextIO.Write) {
+                    try {
+                        TextIO.TypedWrite textio = ((TextIO.Write) transform.getTransform()).withOutputFilenames();
+                        Class cls = textio.getClass();
+                        Method getFileNamePrefix = cls.getDeclaredMethod("getFilenamePrefix");
+                        getFileNamePrefix.setAccessible(true);
+                        ValueProvider.StaticValueProvider provider = (ValueProvider.StaticValueProvider) getFileNamePrefix.invoke(textio);
+                        String filePath = provider.get().toString();
+                        generateSinkQuery("text", streamName, filePath, false);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             } else {
                 for (Iterator transformOuputIterator = transform.getOutputs().values().iterator(); transformOuputIterator.hasNext(); ) {
