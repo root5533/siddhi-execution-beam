@@ -20,6 +20,7 @@ public class SourceWrapper<OutputT> {
     PipelineOptions options;
     List<BoundedSource<OutputT>> localSplitSources;
     List<BoundedReader<OutputT>> localReaders;
+    List<WindowedValue> elements = new ArrayList<>();
 
     public SourceWrapper(BoundedSource source, int parallelism, PipelineOptions options) throws Exception {
         this.options = options;
@@ -50,20 +51,28 @@ public class SourceWrapper<OutputT> {
             boolean hasData = reader.start();
             if (hasData) {
                 this.emitElement(inputHandler, reader);
+                WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
+                elements.add(elem);
             }
             hasData = reader.advance();
             while (hasData) {
                 this.emitElement(inputHandler, reader);
+                WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
+                elements.add(elem);
                 hasData = reader.advance();
             }
+//            this.emitElement(inputHandler);
         }
 
     }
 
     private void emitElement (InputHandler inputHandler, BoundedReader reader) throws Exception {
         WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-//        Thread.sleep(3000);
         inputHandler.send(new Object[]{elem});
+    }
+
+    private void emitElement(InputHandler inputHandler) throws Exception {
+        Object[] stream = elements.toArray();
     }
 
 }
