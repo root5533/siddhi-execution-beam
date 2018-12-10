@@ -7,6 +7,7 @@ import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 
 import java.util.ArrayList;
@@ -20,7 +21,8 @@ public class SourceWrapper<OutputT> {
     PipelineOptions options;
     List<BoundedSource<OutputT>> localSplitSources;
     List<BoundedReader<OutputT>> localReaders;
-    List<WindowedValue> elements = new ArrayList<>();
+//    List<WindowedValue> elements = new ArrayList<>();
+    List<Event> elements = new ArrayList<>();
 
     public SourceWrapper(BoundedSource source, int parallelism, PipelineOptions options) throws Exception {
         this.options = options;
@@ -50,18 +52,18 @@ public class SourceWrapper<OutputT> {
             BoundedReader<OutputT> reader = localReaders.get(0);
             boolean hasData = reader.start();
             if (hasData) {
-                this.emitElement(inputHandler, reader);
+//                this.emitElement(inputHandler, reader);
                 WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-                elements.add(elem);
+                this.convertToEvent(elem);
             }
             hasData = reader.advance();
             while (hasData) {
-                this.emitElement(inputHandler, reader);
+//                this.emitElement(inputHandler, reader);
                 WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-                elements.add(elem);
+                this.convertToEvent(elem);
                 hasData = reader.advance();
             }
-//            this.emitElement(inputHandler);
+            this.emitElements(inputHandler);
         }
 
     }
@@ -71,8 +73,15 @@ public class SourceWrapper<OutputT> {
         inputHandler.send(new Object[]{elem});
     }
 
-    private void emitElement(InputHandler inputHandler) throws Exception {
-        Object[] stream = elements.toArray();
+    private void emitElements(InputHandler inputHandler) throws Exception {
+        Event[] stream = elements.toArray(new Event[0]);
+        inputHandler.send(stream);
+    }
+
+    private void convertToEvent(WindowedValue elem) {
+        Event event = new Event();
+        event.setData(new Object[]{elem});
+        elements.add(event);
     }
 
 }
