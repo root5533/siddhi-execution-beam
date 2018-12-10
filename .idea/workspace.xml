@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f58a62de-bc75-4ad9-aecf-16eb3e48a3b2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SourceWrapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SourceWrapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/component/target/classes/org/wso2/beam/runner/siddhi/SourceWrapper.class" beforeDir="false" afterPath="$PROJECT_DIR$/component/target/classes/org/wso2/beam/runner/siddhi/SourceWrapper.class" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/component/target/" />
@@ -74,7 +72,7 @@
           <entry key="5d195025-425c-49e2-ad52-48162728ea93" value="1" />
           <entry key="class" value="2" />
           <entry key="dummy" value="23" />
-          <entry key="java" value="12871" />
+          <entry key="java" value="12907" />
           <entry key="txt" value="20" />
           <entry key="xml" value="180" />
         </counts>
@@ -82,7 +80,7 @@
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="CLASS" value="2" />
-          <entry key="JAVA" value="12871" />
+          <entry key="JAVA" value="12907" />
           <entry key="PLAIN_TEXT" value="44" />
           <entry key="XML" value="180" />
         </counts>
@@ -156,23 +154,33 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SourceWrapper.java">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiApp.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="269">
-              <caret line="55" column="55" lean-forward="true" selection-start-line="55" selection-start-column="55" selection-end-line="55" selection-end-column="55" />
+            <state relative-caret-position="84">
+              <caret line="257" selection-start-line="257" selection-end-line="257" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#13595#13596#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/GroupingByKey.java">
+        <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiExecutorService.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="845">
-              <caret line="86" column="19" lean-forward="true" selection-start-line="86" selection-start-column="19" selection-end-line="86" selection-end-column="19" />
+            <state relative-caret-position="306">
+              <caret line="55" column="30" lean-forward="true" selection-start-line="55" selection-start-column="30" selection-end-line="55" selection-end-column="30" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SourceWrapper.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="591">
+              <caret line="67" column="7" lean-forward="true" selection-start-line="67" selection-start-column="7" selection-end-line="67" selection-end-column="7" />
             </state>
           </provider>
         </entry>
@@ -311,7 +319,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -364,11 +372,22 @@
               <item name="wso2" type="462c0819:PsiDirectoryNode" />
               <item name="siddhi" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="main" type="462c0819:PsiDirectoryNode" />
+              <item name="java" type="462c0819:PsiDirectoryNode" />
+              <item name="wso2" type="462c0819:PsiDirectoryNode" />
+              <item name="streamprocessor" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
+      <pane id="AndroidView" />
+      <pane id="PackagesPane" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -403,7 +422,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Application.GroupingByKey">
+  <component name="RunManager" selected="Application.Windowing">
     <configuration name="DualParDo" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.wso2.DualParDo" />
       <module name="siddhi-execution-beam" />
@@ -462,7 +481,7 @@
     <configuration name="Windowing" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="org.wso2.Windowing" />
       <module name="siddhi-execution-beam" />
-      <option name="PROGRAM_PARAMETERS" value="--inputFile=$PROJECT_DIR$/input-small.csv --output=$PROJECT_DIR$/../outputs/windowResult" />
+      <option name="PROGRAM_PARAMETERS" value="--inputFile=$PROJECT_DIR$/../inputs/* --output=$PROJECT_DIR$/../outputs/windowResult" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="org.wso2.*" />
@@ -482,8 +501,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.GroupingByKey" />
         <item itemvalue="Application.Windowing" />
+        <item itemvalue="Application.GroupingByKey" />
         <item itemvalue="Application.DualParDo" />
         <item itemvalue="Application.MultiPardo" />
         <item itemvalue="Application.JavaTest" />
@@ -504,10 +523,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="22" width="1920" height="1001" extended-state="6" />
+    <frame x="65" y="-4" width="1855" height="1084" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22790202" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.22553897" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -593,7 +612,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SourceWrapper.java</url>
-          <line>77</line>
+          <line>71</line>
           <properties />
           <option name="timeStamp" value="183" />
         </line-breakpoint>
@@ -797,22 +816,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiApp.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="119">
-          <caret line="115" selection-start-line="115" selection-end-line="115" />
+        <state relative-caret-position="84">
+          <caret line="257" selection-start-line="257" selection-end-line="257" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#12403#12404#0" expanded="true" />
-            <element signature="e#12439#12440#0" expanded="true" />
-            <element signature="e#13411#13412#0" expanded="true" />
-            <element signature="e#13445#13446#0" expanded="true" />
-            <element signature="e#13495#13496#0" expanded="true" />
-            <element signature="e#13530#13531#0" expanded="true" />
-            <element signature="e#13598#13599#0" expanded="true" />
-            <element signature="e#13639#13640#0" expanded="true" />
-            <element signature="e#13702#13703#0" expanded="true" />
-            <element signature="e#13744#13745#0" expanded="true" />
-            <element signature="e#13791#13792#0" expanded="true" />
-            <element signature="e#13834#13835#0" expanded="true" />
+            <element signature="e#13595#13596#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -828,7 +836,6 @@
     <entry file="jar://$MAVEN_REPOSITORY$/org/wso2/siddhi/siddhi-core/4.1.0/siddhi-core-4.1.0-sources.jar!/org/wso2/siddhi/core/stream/StreamJunction.java" />
     <entry file="jar://$MAVEN_REPOSITORY$/org/wso2/siddhi/siddhi-core/4.1.0/siddhi-core-4.1.0-sources.jar!/org/wso2/siddhi/core/stream/input/InputDistributor.java" />
     <entry file="jar://$MAVEN_REPOSITORY$/org/wso2/siddhi/siddhi-core/4.1.0/siddhi-core-4.1.0-sources.jar!/org/wso2/siddhi/core/stream/input/InputEntryValve.java" />
-    <entry file="jar://$MAVEN_REPOSITORY$/org/wso2/siddhi/siddhi-core/4.1.0/siddhi-core-4.1.0-sources.jar!/org/wso2/siddhi/core/SiddhiAppRuntime.java" />
     <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiRunner.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="360">
@@ -895,20 +902,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiExecutorService.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="182">
-          <caret line="103" selection-start-line="103" selection-end-line="103" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///Library/Java/Home/src.zip!/java/lang/System.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="123">
-          <caret line="492" column="30" selection-start-line="492" selection-start-column="30" selection-end-line="492" selection-end-column="30" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="jar:///Library/Java/Home/src.zip!/java/lang/System.java" />
     <entry file="jar://$MAVEN_REPOSITORY$/org/wso2/siddhi/siddhi-core/4.1.0/siddhi-core-4.1.0-sources.jar!/org/wso2/siddhi/core/util/parser/helper/QueryParserHelper.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="224">
@@ -951,9 +945,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/outputs/groupByKeyResult">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/outputs/groupByKeyResult" />
     <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/GroupingByKey.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="845">
@@ -961,13 +953,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/org/wso2/siddhi/siddhi-core/4.1.0/siddhi-core-4.1.0-sources.jar!/org/wso2/siddhi/core/SiddhiAppRuntime.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3120">
+          <caret line="297" selection-start-line="297" selection-end-line="297" />
+          <folding>
+            <element signature="e#13778#13779#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiExecutorService.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="306">
+          <caret line="55" column="30" lean-forward="true" selection-start-line="55" selection-start-column="30" selection-end-line="55" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SourceWrapper.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="269">
-          <caret line="55" column="55" lean-forward="true" selection-start-line="55" selection-start-column="55" selection-end-line="55" selection-end-column="55" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+        <state relative-caret-position="591">
+          <caret line="67" column="7" lean-forward="true" selection-start-line="67" selection-start-column="7" selection-end-line="67" selection-end-column="7" />
         </state>
       </provider>
     </entry>

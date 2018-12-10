@@ -48,30 +48,24 @@ public class SourceWrapper<OutputT> {
         /**
          *Run the source to emit each element to DoFnOperator delegate
          */
-        if (this.localReaders.size() == 1) {
-            BoundedReader<OutputT> reader = localReaders.get(0);
+        for (int i=0; i<this.localReaders.size(); i++) {
+            BoundedReader<OutputT> reader = localReaders.get(i);
             boolean hasData = reader.start();
-            if (hasData) {
-//                this.emitElement(inputHandler, reader);
-                WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-                this.convertToEvent(elem);
-            }
-            hasData = reader.advance();
             while (hasData) {
 //                this.emitElement(inputHandler, reader);
                 WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
                 this.convertToEvent(elem);
                 hasData = reader.advance();
             }
-            this.emitElements(inputHandler);
         }
+        this.emitElements(inputHandler);
 
     }
 
-    private void emitElement (InputHandler inputHandler, BoundedReader reader) throws Exception {
-        WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-        inputHandler.send(new Object[]{elem});
-    }
+//    private void emitElement (InputHandler inputHandler, BoundedReader reader) throws Exception {
+//        WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
+//        inputHandler.send(new Object[]{elem});
+//    }
 
     private void emitElements(InputHandler inputHandler) throws Exception {
         Event[] stream = elements.toArray(new Event[0]);
