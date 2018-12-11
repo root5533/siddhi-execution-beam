@@ -107,6 +107,7 @@ public class GroupByKeyProcessor<K, V> extends StreamProcessor {
                  complexEventChunk.add(streamEvent);
             }
             nextProcessor.process(complexEventChunk);
+            this.groupByKey.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -3,6 +3,7 @@ package org.wso2.beam.runner.siddhi;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.runners.AppliedPTransform;
+import org.apache.beam.sdk.transforms.Flatten;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.windowing.FixedWindows;
@@ -41,9 +42,6 @@ public class SiddhiApp {
         this.graph = context.getGraph();
         for (Iterator rootBundleIterator = context.getRootBundles().iterator(); rootBundleIterator.hasNext(); ) {
             CommittedBundle<SourceWrapper> rootBundle = (CommittedBundle) rootBundleIterator.next();
-            if (!rootBundle.getPCollection().getName().equals("Readfile/Read.out")) {
-                continue;
-            }
             List<AppliedPTransform<?, ?, ?>> transformList = graph.getPerElementConsumers(rootBundle.getPCollection());
             for (Iterator transformIterator = transformList.iterator(); transformIterator.hasNext(); ) {
                 AppliedPTransform transform = (AppliedPTransform) transformIterator.next();
@@ -109,7 +107,7 @@ public class SiddhiApp {
         /*
         If transform is not in HashMap
          */
-        if (this.transformsMap.get(transform.getFullName()) == null) {
+        if (this.transformsMap.get(SiddhiApp.generateTransformName(transform.getFullName())) == null) {
             /*
             Add stream definition and to HashMap for given transform
              */
@@ -185,9 +183,13 @@ public class SiddhiApp {
                                 query += " select event insert into " + outputStreamName + ";";
                             }
                             if (windowTransform.getWindowFn() instanceof GlobalWindows) {
-                                query = "from " + streamName + "#window.timeBatch(1 sec) select event insert into " + outputStreamName + ";";
+                                query = "from " + streamName + " select event insert into " + outputStreamName + ";";
                                 //                            query = "from " + streamName + " select event insert into " + outputStreamName + ";";
                             }
+                            this.queryDefinitions.add(query);
+                        }
+                        if (transform.getTransform() instanceof Flatten.PCollections) {
+                            String query = "from " + streamName + " select event insert into " + outputStreamName + ";";
                             this.queryDefinitions.add(query);
                         }
                         if (outputStreamName != this.writeStreamName) {
@@ -221,6 +223,9 @@ public class SiddhiApp {
             }
         }
         if (transform.getTransform() instanceof TextIO.Write) {
+            return true;
+        }
+        if (transform.getTransform() instanceof Flatten.PCollections) {
             return true;
         }
         return false;

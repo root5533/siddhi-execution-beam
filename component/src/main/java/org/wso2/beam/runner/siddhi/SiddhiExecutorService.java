@@ -49,9 +49,6 @@ public class SiddhiExecutorService {
              */
             for (Iterator roots = context.getRootBundles().iterator(); roots.hasNext(); ) {
                 CommittedBundle<SourceWrapper> rootBundle = (CommittedBundle<SourceWrapper>) roots.next();
-                if (!rootBundle.getPCollection().getName().equals("Readfile/Read.out")) {
-                    continue;
-                }
                 SourceWrapper source = rootBundle.getSourceWrapper();
                 source.open();
                 List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
@@ -64,7 +61,7 @@ public class SiddhiExecutorService {
                 /*
                 Finalize output WriteFile
                  */
-                Thread.sleep(3000);
+//                Thread.sleep(3000);
 //                CommittedBundle bundle = executionRuntime.getBundle();
 //                bundle.setPCollection(executionRuntime.getFinalCollection());
 //                if (bundle.getValues().peek() != null) {
@@ -91,13 +88,13 @@ public class SiddhiExecutorService {
 //                    LOG.info("***No data in bundle to write!***");
 //                }
 
-                CommittedBundle bundle = executionRuntime.getBundle();
-                bundle.setPCollection(executionRuntime.getFinalCollection());
-                if (bundle.getValues().peek() != null) {
-                    LOG.info("***Data in bundle to write!***");
-                } else {
-                    LOG.info("***No data in bundle to write!***");
-                }
+//                CommittedBundle bundle = executionRuntime.getBundle();
+//                bundle.setPCollection(executionRuntime.getFinalCollection());
+//                if (bundle.getValues().peek() != null) {
+//                    LOG.info("***Data in bundle to write!***");
+//                } else {
+//                    LOG.info("***No data in bundle to write!***");
+//                }
             }
             LOG.info("Siddhi Runner Complete");
         } catch (Exception e) {
