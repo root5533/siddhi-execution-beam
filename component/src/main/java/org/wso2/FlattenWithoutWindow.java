@@ -10,6 +10,7 @@ import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionList;
 import org.joda.time.Duration;
+import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
 import org.wso2.beam.runner.siddhi.SiddhiRunner;
 
 import java.util.Arrays;
@@ -18,20 +19,6 @@ import java.util.Iterator;
 
 public class FlattenWithoutWindow
 {
-
-    private interface CSVOptions extends PipelineOptions, StreamingOptions {
-
-        @Description("Set input target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/input-large.csv")
-        String getInputFile();
-        void setInputFile(String value);
-
-        @Description("Set output target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/outputs/groupByKeySiddhiResult")
-        String getOutput();
-        void setOutput(String value);
-
-    }
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
@@ -75,12 +62,12 @@ public class FlattenWithoutWindow
 
     public static void main( String[] args )
     {
-        CSVOptions options = PipelineOptionsFactory.fromArgs(args).as(CSVOptions.class);
+        SiddhiPipelineOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runCSVDemo(options);
     }
 
-    private static void runCSVDemo(CSVOptions options) {
+    private static void runCSVDemo(SiddhiPipelineOptions options) {
 
         Pipeline pipe = Pipeline.create(options);
         PCollection<KV<String, String[]>> collection_1 = pipe.apply("Readfile", TextIO.read().from("/home/tuan/WSO2/inputs/input-small.csv"))

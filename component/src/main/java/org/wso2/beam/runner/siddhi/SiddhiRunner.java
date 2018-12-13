@@ -25,7 +25,6 @@ public class SiddhiRunner extends PipelineRunner<PipelineResult> {
     @Override
     public PipelineResult run(Pipeline pipeline) {
         int targetParallelism = 1;
-        LOG.info("Executing local runner");
         GraphVisitor graphVisitor = new GraphVisitor();
         pipeline.traverseTopologically(graphVisitor);
         DirectGraph graph = graphVisitor.getGraph();

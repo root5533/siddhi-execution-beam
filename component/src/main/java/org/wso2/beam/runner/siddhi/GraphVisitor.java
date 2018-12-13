@@ -20,18 +20,18 @@ import java.util.*;
 public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
 
     private static final Logger LOG = LoggerFactory.getLogger(GraphVisitor.class);
-    private Map<AppliedPTransform<?, ?, ?>, String> stepNames = new HashMap();
+//    private Map<AppliedPTransform<?, ?, ?>, String> stepNames = new HashMap();
     private Set<AppliedPTransform<?, ?, ?>> rootTransforms = new HashSet();
     private ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers = ArrayListMultimap.create();
     private ListMultimap<PValue, AppliedPTransform<?, ?, ?>> allConsumers = ArrayListMultimap.create();
-    private Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers = new HashMap();
+//    private Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers = new HashMap();
     private int numTransforms = 0;
     private int depth;
 
     public CompositeBehavior enterCompositeTransform(Node node) {
         if (node.getTransform() instanceof TextIO.Write) {
             AppliedPTransform<?, ?, ?> appliedPTransform = this.getAppliedTransform(node);
-            this.stepNames.put(appliedPTransform, this.genStepName());
+//            this.stepNames.put(appliedPTransform, this.genStepName());
             Collection<PValue> mainInputs = TransformInputs.nonAdditionalInputs(node.toAppliedPTransform(this.getPipeline()));
             Iterator iter = mainInputs.iterator();
             PValue value;
@@ -60,7 +60,7 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
 //        LOG.info("{} visitPrimitiveTransform- {}", genSpaces(this.depth), node.getFullName());
 
         AppliedPTransform<?, ?, ?> appliedPTransform = this.getAppliedTransform(node);
-        this.stepNames.put(appliedPTransform, this.genStepName());
+//        this.stepNames.put(appliedPTransform, this.genStepName());
         if (node.getInputs().isEmpty()) {
             if (appliedPTransform.getTransform() instanceof Read.Bounded) {
                 this.rootTransforms.add(appliedPTransform);
@@ -84,13 +84,13 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
         }
     }
 
-    public void visitValue(PValue value, Node node) {
-//        LOG.info("{} visitValue- {}", genSpaces(this.depth), node.getFullName());
-        AppliedPTransform<?, ?, ?> appliedTransform = this.getAppliedTransform(node);
-        if (value instanceof PCollection && !this.producers.containsKey(value)) {
-            this.producers.put((PCollection)value, appliedTransform);
-        }
-    }
+//    public void visitValue(PValue value, Node node) {
+////        LOG.info("{} visitValue- {}", genSpaces(this.depth), node.getFullName());
+//        AppliedPTransform<?, ?, ?> appliedTransform = this.getAppliedTransform(node);
+//        if (value instanceof PCollection && !this.producers.containsKey(value)) {
+//            this.producers.put((PCollection)value, appliedTransform);
+//        }
+//    }
 
     private AppliedPTransform<?, ?, ?> getAppliedTransform(Node node) {
 //        LOG.info("{} getAppliedTransform- {}", genSpaces(this.depth), node.getFullName());
@@ -99,22 +99,22 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
 
     public DirectGraph getGraph() {
 //        LOG.info("{} getGraph- {}", genSpaces(this.depth));
-        return DirectGraph.create(producers, perElementConsumers, rootTransforms, stepNames);
+        return DirectGraph.create(perElementConsumers, rootTransforms);
     }
 
-    protected static String genSpaces(int n) {
-        StringBuilder builder = new StringBuilder();
+//    protected static String genSpaces(int n) {
+//        StringBuilder builder = new StringBuilder();
+//
+//        for(int i = 0; i < n; ++i) {
+//            builder.append("|   ");
+//        }
+//
+//        return builder.toString();
+//    }
 
-        for(int i = 0; i < n; ++i) {
-            builder.append("|   ");
-        }
-
-        return builder.toString();
-    }
-
-    private String genStepName() {
-        return String.format("s%s", this.numTransforms++);
-    }
+//    private String genStepName() {
+//        return String.format("s%s", this.numTransforms++);
+//    }
 
 
 }

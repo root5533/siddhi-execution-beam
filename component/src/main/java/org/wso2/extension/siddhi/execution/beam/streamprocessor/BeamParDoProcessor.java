@@ -2,14 +2,11 @@ package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 
 import org.apache.beam.sdk.io.FileBasedSink;
 import org.apache.beam.sdk.runners.AppliedPTransform;
-import org.apache.beam.sdk.transforms.GroupByKey;
-import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.beam.runner.siddhi.ExecutionContext;
-import org.wso2.beam.runner.siddhi.GroupDoFnOperator;
 import org.wso2.beam.runner.siddhi.SiddhiDoFnOperator;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
@@ -79,9 +76,9 @@ import java.util.Map;
  * </code></pre>
  */
 
-public class BeamStreamProcessor  extends StreamProcessor {
+public class BeamParDoProcessor extends StreamProcessor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeamStreamProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BeamParDoProcessor.class);
     private String beamTransform;
     private SiddhiDoFnOperator operator;
     private boolean fileWriteFlag = false;
@@ -91,7 +88,7 @@ public class BeamStreamProcessor  extends StreamProcessor {
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        LOG.info("Processing element in >>>>> " + this.beamTransform);
+//        LOG.info("Processing element in >>>>> " + this.beamTransform);
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         try {
             while (streamEventChunk.hasNext()) {

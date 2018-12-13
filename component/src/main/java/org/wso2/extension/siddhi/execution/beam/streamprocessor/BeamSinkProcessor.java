@@ -1,7 +1,6 @@
 package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 
 import org.apache.beam.sdk.util.WindowedValue;
-import org.apache.beam.sdk.values.KV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
@@ -16,6 +15,7 @@ import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
+
 import java.util.*;
 
 /**
@@ -68,46 +68,28 @@ import java.util.*;
  * </code></pre>
  */
 
-public class GroupByKeyProcessor<K, V> extends StreamProcessor {
+public class BeamSinkProcessor<V> extends StreamProcessor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GroupByKeyProcessor.class);
-    private HashMap<K, ArrayList<V>> groupByKey = new HashMap();
+    private static final Logger LOG = LoggerFactory.getLogger(BeamSinkProcessor.class);
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        LOG.info("Grouping elements >>>><<<<");
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         try {
-            while (streamEventChunk.hasNext()) {
+            while(streamEventChunk.hasNext()) {
                 StreamEvent event = streamEventChunk.next();
-                for (int i=0; i<event.getOutputData().length; i++) {
-                    if (event.getOutputData()[i] instanceof WindowedValue) {
-                        KV element = (KV) ((WindowedValue) event.getOutputData()[i]).getValue();
-                        if (this.groupByKey.containsKey(element.getKey())) {
-                            ArrayList<V> items = this.groupByKey.get(element.getKey());
-                            items.add((V) element.getValue());
-                            this.groupByKey.put((K) element.getKey(), items);
-                        } else {
-                            ArrayList<V> item = new ArrayList<>();
-                            item.add((V) element.getValue());
-                            this.groupByKey.put((K) element.getKey(), item);
-                        }
-                    }
+                for (int i = 0; i < event.getBeforeWindowData().length; i++) {
+                    WindowedValue element = (WindowedValue) event.getBeforeWindowData()[i];
+                    String newValue = (String) element.getValue();
+                    Object[] outputObject = {newValue};
+                    StreamEvent streamEvent = new StreamEvent(0, 0, 1);
+                    streamEvent.setOutputData(outputObject);
+                    complexEventChunk.add(streamEvent);
                 }
             }
-            for (Iterator iter = this.groupByKey.entrySet().iterator(); iter.hasNext();) {
-                 Map.Entry map = (Map.Entry) iter.next();
-                 K key = (K) map.getKey();
-                 ArrayList<V> value = (ArrayList<V>) map.getValue();
-                 KV kv = KV.of(key, value);
-                 StreamEvent streamEvent = new StreamEvent(0,0,1);
-                 streamEvent.setOutputData(WindowedValue.valueInGlobalWindow(kv), 0);
-                 complexEventChunk.add(streamEvent);
-            }
             nextProcessor.process(complexEventChunk);
-            this.groupByKey.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -123,18 +105,11 @@ public class GroupByKeyProcessor<K, V> extends StreamProcessor {
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
         if (attributeExpressionLength != 1) {
-            throw new SiddhiAppCreationException("Only 1 parameter can be specified for GroupByKeyProcessor");
-        }
-
-        if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
-
-            try {
-//                System.out.println("GroupByKeyProcessor init()");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            throw new SiddhiAppCreationException("Only 1 parameters can be specified for BeamSinkProcessor");
         } else {
-            throw new SiddhiAppCreationException("First parameter must be of type Object");
+            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
+                attributes.add(new Attribute("value", Attribute.Type.STRING));
+            }
         }
 
         return attributes;

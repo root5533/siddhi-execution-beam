@@ -86,6 +86,9 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
             try {
                 StreamEvent streamEvent = new StreamEvent(0, 0, 1);
                 streamEvent.setOutputData(output, 0);
+                if (SiddhiDoFnOperator.this.complexEventChunk == null) {
+                    System.out.println("complex event chunk is null");
+                }
                 SiddhiDoFnOperator.this.complexEventChunk.add(streamEvent);
             } catch (Exception e) {
                 e.printStackTrace();

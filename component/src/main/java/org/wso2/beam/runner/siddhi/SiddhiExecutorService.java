@@ -29,8 +29,8 @@ public class SiddhiExecutorService {
             ExecutionContext context = ExecutionContext.getContext();
             context.setGraph(graph);
             for (Iterator iter = graph.getRootTransforms().iterator(); iter.hasNext(); ) {
-                AppliedPTransform root = (AppliedPTransform) iter.next();
-                ReadEvaluator evaluator = new ReadEvaluator(root);
+                AppliedPTransform rootTransform = (AppliedPTransform) iter.next();
+                ReadEvaluator evaluator = new ReadEvaluator(rootTransform);
                 evaluator.execute(this.targetParallelism);
             }
 
@@ -57,46 +57,8 @@ public class SiddhiExecutorService {
                     String inputStream = SiddhiApp.generateTransformName(transform.getFullName()) + "Stream";
                     source.run(executionRuntime.getSiddhiRuntime().getInputHandler(inputStream));
                 }
-
-                /*
-                Finalize output WriteFile
-                 */
-//                Thread.sleep(3000);
-//                CommittedBundle bundle = executionRuntime.getBundle();
-//                bundle.setPCollection(executionRuntime.getFinalCollection());
-//                if (bundle.getValues().peek() != null) {
-//                    for (Iterator iter = graph.getAllPerElementConsumers().asMap().values().iterator(); iter.hasNext(); ) {
-//                        List transformList = (List) iter.next();
-//                        AppliedPTransform transform = (AppliedPTransform) transformList.get(0);
-//                        if (transform.getFullName().equals("Writefile/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles")) {
-//                            WriteEvaluator eval = new WriteEvaluator(transform, bundle, context);
-//                            eval.execute();
-//                            for (Iterator iterator = graph.getAllPerElementConsumers().asMap().values().iterator(); iterator.hasNext(); ) {
-//                                transformList = (List) iterator.next();
-//                                transform = (AppliedPTransform) transformList.get(0);
-//                                if (transform.getFullName().equals("Writefile/WriteFiles/FinalizeTempFileBundles/Finalize/ParMultiDo(Finalize)")) {
-//                                    bundle = context.getFinalBundle();
-//                                    eval = new WriteEvaluator(transform, bundle, context);
-//                                    eval.execute();
-//                                    break;
-//                                }
-//                            }
-//                            break;
-//                        }
-//                    }
-//                } else {
-//                    LOG.info("***No data in bundle to write!***");
-//                }
-
-//                CommittedBundle bundle = executionRuntime.getBundle();
-//                bundle.setPCollection(executionRuntime.getFinalCollection());
-//                if (bundle.getValues().peek() != null) {
-//                    LOG.info("***Data in bundle to write!***");
-//                } else {
-//                    LOG.info("***No data in bundle to write!***");
-//                }
             }
-            LOG.info("Siddhi Runner Complete");
+            LOG.info("Executing pipeline");
         } catch (Exception e) {
             e.printStackTrace();
         }

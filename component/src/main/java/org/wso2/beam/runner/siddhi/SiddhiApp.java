@@ -13,9 +13,9 @@ import org.apache.beam.sdk.values.PCollection;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamStreamProcessor;
-import org.wso2.extension.siddhi.execution.beam.streamprocessor.GroupByKeyProcessor;
-import org.wso2.extension.siddhi.execution.beam.streamprocessor.SourceSinkProcessor;
+import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamGroupByKeyProcessor;
+import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamSinkProcessor;
+import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamParDoProcessor;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
 import java.util.*;
@@ -87,9 +87,9 @@ public class SiddhiApp {
             queries = queries + iter.next().toString();
         }
         System.out.println(streams + queries);
-        siddhiManager.setExtension("beam:execute", BeamStreamProcessor.class);
-        siddhiManager.setExtension("beam:groupbykey", GroupByKeyProcessor.class);
-        siddhiManager.setExtension("beam:sourcesink", SourceSinkProcessor.class);
+        siddhiManager.setExtension("beam:execute", BeamParDoProcessor.class);
+        siddhiManager.setExtension("beam:groupbykey", BeamGroupByKeyProcessor.class);
+        siddhiManager.setExtension("beam:sourcesink", BeamSinkProcessor.class);
         this.runtime = siddhiManager.createSiddhiAppRuntime(streams + queries);
 
 //        runtime.addCallback("outputStream", new StreamCallback() {
@@ -255,9 +255,9 @@ public class SiddhiApp {
         }
     }
 
-    public CommittedBundle getBundle() {
-        return this.bundle;
-    }
+//    public CommittedBundle getBundle() {
+//        return this.bundle;
+//    }
 
     public SiddhiAppRuntime getSiddhiRuntime() {
         return this.runtime;
@@ -271,9 +271,9 @@ public class SiddhiApp {
         return this.collectionsMap;
     }
 
-    public PCollection getFinalCollection() {
-        return this.finalCollection;
-    }
+//    public PCollection getFinalCollection() {
+//        return this.finalCollection;
+//    }
 
     public static String generateTransformName(String value) {
         return value.replace('/', '_').replace('(', '_').replace(")", "").replace('.','_');

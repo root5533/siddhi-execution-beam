@@ -17,18 +17,6 @@ import java.util.List;
 
 public class MultiPardo {
 
-    private interface SiddhiOptions extends SiddhiPipelineOptions, StreamingOptions {
-        @Description("Set input target")
-        @Default.String("/siddhi-beam.txt")
-        String getInputFile();
-        void setInputFile(String value);
-
-        @Description("Set output target")
-        @Default.String("/outputs/result")
-        String getOutput();
-        void setOutput(String value);
-    }
-
     private static class SplitString extends DoFn<String, String> {
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<String> out) {
@@ -61,7 +49,7 @@ public class MultiPardo {
         }
     }
 
-    private static void runSimpleSiddhiApp(SiddhiOptions options) {
+    private static void runSimpleSiddhiApp(SiddhiPipelineOptions options) {
         Pipeline pipe = Pipeline.create(options);
         PCollection<String> col1 = pipe.apply("Readfile", TextIO.read().from(options.getInputFile()));
         PCollection<String> col2 = col1.apply("SplitString", ParDo.of(new SplitString()));
@@ -72,7 +60,7 @@ public class MultiPardo {
     }
 
     public static void main(String[] args) {
-           SiddhiOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiOptions.class);
+        SiddhiPipelineOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runSimpleSiddhiApp(options);
     }

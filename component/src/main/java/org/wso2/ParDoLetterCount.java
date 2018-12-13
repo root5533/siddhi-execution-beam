@@ -12,19 +12,7 @@ import org.apache.beam.sdk.values.PCollection;
 import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
 import org.wso2.beam.runner.siddhi.SiddhiRunner;
 
-public class Main {
-
-    private interface SiddhiOptions extends SiddhiPipelineOptions, StreamingOptions {
-        @Description("Set input target")
-        @Default.String("/siddhi-beam.txt")
-        String getInputFile();
-        void setInputFile(String value);
-
-        @Description("Set output target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/outputs/result")
-        String getOutput();
-        void setOutput(String value);
-    }
+public class ParDoLetterCount {
 
     private static class LetterCount extends DoFn<String, String> {
         @ProcessElement
@@ -35,7 +23,7 @@ public class Main {
         }
     }
 
-    private static void runSimpleSiddhiApp(SiddhiOptions options) {
+    private static void runSimpleSiddhiApp(SiddhiPipelineOptions options) {
         Pipeline pipe = Pipeline.create(options);
         PCollection<String> col1 = pipe.apply("Readfile", TextIO.read().from(options.getInputFile()));
         PCollection<String> col2 = col1.apply("PardoTransform", ParDo.of(new LetterCount()));
@@ -44,7 +32,7 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        SiddhiOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiOptions.class);
+        SiddhiPipelineOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runSimpleSiddhiApp(options);
     }

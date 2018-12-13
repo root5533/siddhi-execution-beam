@@ -10,14 +10,12 @@ import org.wso2.siddhi.core.event.stream.StreamEvent;
 import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
-import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
-
 import java.util.*;
 
 /**
@@ -70,29 +68,45 @@ import java.util.*;
  * </code></pre>
  */
 
-public class SourceSinkProcessor<V> extends StreamProcessor {
+public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SourceSinkProcessor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BeamGroupByKeyProcessor.class);
+    private HashMap<K, ArrayList<V>> groupByKey = new HashMap();
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        LOG.info("Transforming object to process in sink stream");
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         try {
-            while(streamEventChunk.hasNext()) {
+            while (streamEventChunk.hasNext()) {
                 StreamEvent event = streamEventChunk.next();
-                for (int i = 0; i < event.getBeforeWindowData().length; i++) {
-                    WindowedValue element = (WindowedValue) event.getBeforeWindowData()[i];
-                    String newValue = (String) element.getValue();
-                    Object[] outputObject = {newValue};
-                    StreamEvent streamEvent = new StreamEvent(0, 0, 1);
-                    streamEvent.setOutputData(outputObject);
-                    complexEventChunk.add(streamEvent);
+                for (int i=0; i<event.getOutputData().length; i++) {
+                    if (event.getOutputData()[i] instanceof WindowedValue) {
+                        KV element = (KV) ((WindowedValue) event.getOutputData()[i]).getValue();
+                        if (this.groupByKey.containsKey(element.getKey())) {
+                            ArrayList<V> items = this.groupByKey.get(element.getKey());
+                            items.add((V) element.getValue());
+                            this.groupByKey.put((K) element.getKey(), items);
+                        } else {
+                            ArrayList<V> item = new ArrayList<>();
+                            item.add((V) element.getValue());
+                            this.groupByKey.put((K) element.getKey(), item);
+                        }
+                    }
                 }
             }
+            for (Iterator iter = this.groupByKey.entrySet().iterator(); iter.hasNext();) {
+                 Map.Entry map = (Map.Entry) iter.next();
+                 K key = (K) map.getKey();
+                 ArrayList<V> value = (ArrayList<V>) map.getValue();
+                 KV kv = KV.of(key, value);
+                 StreamEvent streamEvent = new StreamEvent(0,0,1);
+                 streamEvent.setOutputData(WindowedValue.valueInGlobalWindow(kv), 0);
+                 complexEventChunk.add(streamEvent);
+            }
             nextProcessor.process(complexEventChunk);
+            this.groupByKey.clear();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -106,17 +120,9 @@ public class SourceSinkProcessor<V> extends StreamProcessor {
                                    SiddhiAppContext siddhiAppContext) {
 
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
-//        attributes.add(new Attribute("event", Attribute.Type.OBJECT));
 
         if (attributeExpressionLength != 1) {
-            throw new SiddhiAppCreationException("Only 1 parameters can be specified for SourceSinkProcessor");
-        } else {
-            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
-                attributes.add(new Attribute("value", Attribute.Type.STRING));
-            }
-//            } else {
-//                attributes.add(new Attribute("newValue", Attribute.Type.OBJECT));
-//            }
+            throw new SiddhiAppCreationException("Only 1 parameter can be specified for BeamGroupByKeyProcessor");
         }
 
         return attributes;

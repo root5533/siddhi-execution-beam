@@ -10,6 +10,7 @@ import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionList;
 import org.joda.time.Duration;
+import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
 import org.wso2.beam.runner.siddhi.SiddhiRunner;
 
 import java.util.Arrays;
@@ -18,14 +19,6 @@ import java.util.Iterator;
 
 public class FlattenWithWindow
 {
-
-    private interface CSVOptions extends PipelineOptions, StreamingOptions {
-        @Description("Set output target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/outputs/groupByKeySiddhiResult")
-        String getOutput();
-        void setOutput(String value);
-
-    }
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
@@ -69,12 +62,12 @@ public class FlattenWithWindow
 
     public static void main( String[] args )
     {
-        CSVOptions options = PipelineOptionsFactory.fromArgs(args).as(CSVOptions.class);
+        SiddhiPipelineOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runCSVDemo(options);
     }
 
-    private static void runCSVDemo(CSVOptions options) {
+    private static void runCSVDemo(SiddhiPipelineOptions options) {
 
         Pipeline pipe = Pipeline.create(options);
 

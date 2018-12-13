@@ -11,24 +11,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class DirectGraph implements ExecutableGraph<AppliedPTransform<?, ?, ?>, PValue> {
+public class DirectGraph {
 
-    private final Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers;
+//    private final Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers;
     private final ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers;
     private final Set<AppliedPTransform<?, ?, ?>> rootTransforms;
-    private final Map<AppliedPTransform<?, ?, ?>, String> stepNames;
+//    private final Map<AppliedPTransform<?, ?, ?>, String> stepNames;
 
-    public static DirectGraph create(Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers, ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers,
-                                     Set<AppliedPTransform<?, ?, ?>> rootTransforms, Map<AppliedPTransform<?, ?, ?>, String> stepNames) {
-        return new DirectGraph(producers, perElementConsumers, rootTransforms, stepNames);
+    public static DirectGraph create(ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers,
+                                     Set<AppliedPTransform<?, ?, ?>> rootTransforms) {
+        return new DirectGraph(perElementConsumers, rootTransforms);
     }
 
-    private DirectGraph(Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers, ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers,
-                        Set<AppliedPTransform<?, ?, ?>> rootTransforms, Map<AppliedPTransform<?, ?, ?>, String> stepNames) {
-        this.producers = producers;
+    private DirectGraph(ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers,
+                        Set<AppliedPTransform<?, ?, ?>> rootTransforms) {
+//        this.producers = producers;
         this.perElementConsumers = perElementConsumers;
         this.rootTransforms = rootTransforms;
-        this.stepNames = stepNames;
+//        this.stepNames = stepNames;
     }
 
     public Set<AppliedPTransform<?, ?, ?>> getRootTransforms() {
@@ -39,8 +39,8 @@ public class DirectGraph implements ExecutableGraph<AppliedPTransform<?, ?, ?>, 
         return this.perElementConsumers.get(consumed);
     }
 
-    public ListMultimap getAllPerElementConsumers() {
-        return this.perElementConsumers;
-    }
+//    public ListMultimap getAllPerElementConsumers() {
+//        return this.perElementConsumers;
+//    }
 
 }

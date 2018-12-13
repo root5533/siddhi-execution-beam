@@ -21,7 +21,6 @@ public class SourceWrapper<OutputT> {
     PipelineOptions options;
     List<BoundedSource<OutputT>> localSplitSources;
     List<BoundedReader<OutputT>> localReaders;
-//    List<WindowedValue> elements = new ArrayList<>();
     List<Event> elements = new ArrayList<>();
 
     public SourceWrapper(BoundedSource source, int parallelism, PipelineOptions options) throws Exception {

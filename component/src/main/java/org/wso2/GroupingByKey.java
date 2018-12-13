@@ -6,6 +6,7 @@ import org.apache.beam.sdk.options.*;
 import org.apache.beam.sdk.transforms.*;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
+import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
 import org.wso2.beam.runner.siddhi.SiddhiRunner;
 
 import java.util.Arrays;
@@ -14,20 +15,6 @@ import java.util.Iterator;
 
 public class GroupingByKey
 {
-
-    private interface CSVOptions extends PipelineOptions, StreamingOptions {
-
-        @Description("Set input target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/input-small.csv")
-        String getInputFile();
-        void setInputFile(String value);
-
-        @Description("Set output target")
-        @Default.String("/Users/admin/Projects/siddhi-execution-beam/outputs/groupByKeySiddhiResult")
-        String getOutput();
-        void setOutput(String value);
-
-    }
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
@@ -71,12 +58,12 @@ public class GroupingByKey
 
     public static void main( String[] args )
     {
-        CSVOptions options = PipelineOptionsFactory.fromArgs(args).as(CSVOptions.class);
+        SiddhiPipelineOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runCSVDemo(options);
     }
 
-    private static void runCSVDemo(CSVOptions options) {
+    private static void runCSVDemo(SiddhiPipelineOptions options) {
 
         Pipeline pipe = Pipeline.create(options);
         pipe.apply("Readfile", TextIO.read().from(options.getInputFile()))
