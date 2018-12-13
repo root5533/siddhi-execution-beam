@@ -1,9 +1,31 @@
+/*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 
 import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.KV;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wso2.siddhi.annotation.Example;
+import org.wso2.siddhi.annotation.Extension;
+import org.wso2.siddhi.annotation.Parameter;
+import org.wso2.siddhi.annotation.util.DataType;
 import org.wso2.siddhi.core.config.SiddhiAppContext;
 import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
@@ -18,55 +40,25 @@ import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 import java.util.*;
 
-/**
- * This is a sample class-level comment, explaining what the extension class does.
- */
 
-/**
- * Annotation of Siddhi Extension.
- * <pre><code>
- * eg:-
- * {@literal @}Extension(
- * name = "The name of the extension",
- * namespace = "The namespace of the extension",
- * description = "The description of the extension (optional).",
- * //Sink configurations
- * parameters = {
- * {@literal @}Parameter(name = "The name of the first parameter",
- *                               description= "The description of the first parameter",
- *                               type =  "Supported parameter types.
- *                                        eg:{DataType.STRING, DataType.INT, DataType.LONG etc}",
- *                               dynamic= "false
- *                                         (if parameter doesn't depend on each event then dynamic parameter is false.
- *                                         )",
- *                               optional= "true/false, defaultValue= if it is optional then assign a default value
- *                                          according to the type."),
- * {@literal @}Parameter(name = "The name of the second parameter",
- *                               description= "The description of the second parameter",
- *                               type =   "Supported parameter types.
- *                                         eg:{DataType.STRING, DataType.INT, DataType.LONG etc}",
- *                               dynamic= "false
- *                                         (if parameter doesn't depend on each event then dynamic parameter is false.
- *                                         In Source, only use static parameter)",
- *                               optional= "true/false, defaultValue= if it is optional then assign a default value
- *                                         according to the type."),
- * },
- * //If Source system configurations will need then
- * systemParameters = {
- * {@literal @}SystemParameter(name = "The name of the first  system parameter",
- *                                      description="The description of the first system parameter." ,
- *                                      defaultValue = "the default value of the system parameter.",
- *                                      possibleParameter="the possible value of the system parameter.",
- *                               ),
- * },
- * examples = {
- * {@literal @}Example(syntax = "sample query that explain how extension use in Siddhi."
- *                              description =" The description of the given example's query."
- *                      ),
- * }
- * )
- * </code></pre>
- */
+@Extension(
+        name = "groupbykey",
+        namespace = "beam",
+        description = "This stream processor extension performs grouping of events by key.\n" +
+                " for WindowedValue objects when executing a Beam pipeline.",
+        parameters = {
+                @Parameter(name = "event",
+                        description = "All the events of type WindowedValue arriving in chunk to execute GroupByKey transform",
+                        type = {DataType.OBJECT})
+        },
+        examples = @Example(
+                syntax = "define stream inputStream (event object);\n" +
+                        "@info(name = 'query1')\n" +
+                        "from inputStream#beam:groupbykey(event)\n" +
+                        "select event\n" +
+                        "insert into outputStream;",
+                description = "This query performs Beam GroupByKey transformation provided WindowedValue<KV> as event")
+)
 
 public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
 

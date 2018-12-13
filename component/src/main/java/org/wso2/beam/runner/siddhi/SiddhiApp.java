@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2018, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *
+ * WSO2 Inc. licenses this file to you under the Apache License,
+ * Version 2.0 (the "License"); you may not use this file except
+ * in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.sdk.io.TextIO;
@@ -51,9 +69,6 @@ public class SiddhiApp {
             }
         }
 
-        /*
-        Create final writeStream siddhi query(hardcoded)
-         */
 //        for (Iterator iterator = this.graph.getAllPerElementConsumers().asMap().values().iterator(); iterator.hasNext(); ) {
 //            List transformList = (List) iterator.next();
 //            AppliedPTransform transform = (AppliedPTransform) transformList.get(0);
@@ -66,7 +81,7 @@ public class SiddhiApp {
 //                    this.collectionsMap.put(SiddhiApp.generateTransformName(transform.getFullName()), collection);
 //                    break;
 //                }
-//                String query = "from " + this.writeStreamName + "#beam:execute(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
+//                String query = "from " + this.writeStreamName + "#beam:pardo(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
 //                        "select event insert into " + this.finalStream;
 //                this.queryDefinitions.add(query);
 //            }
@@ -87,9 +102,9 @@ public class SiddhiApp {
             queries = queries + iter.next().toString();
         }
         System.out.println(streams + queries);
-        siddhiManager.setExtension("beam:execute", BeamParDoProcessor.class);
+        siddhiManager.setExtension("beam:pardo", BeamParDoProcessor.class);
         siddhiManager.setExtension("beam:groupbykey", BeamGroupByKeyProcessor.class);
-        siddhiManager.setExtension("beam:sourcesink", BeamSinkProcessor.class);
+        siddhiManager.setExtension("beam:sink", BeamSinkProcessor.class);
         this.runtime = siddhiManager.createSiddhiAppRuntime(streams + queries);
 
 //        runtime.addCallback("outputStream", new StreamCallback() {
@@ -158,7 +173,7 @@ public class SiddhiApp {
                             outputStreamName = this.writeStreamName;
                         }
                         if (transform.getTransform() instanceof ParDo.MultiOutput) {
-                            String query = "from " + streamName + "#beam:execute(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
+                            String query = "from " + streamName + "#beam:pardo(event, \"" + SiddhiApp.generateTransformName(transform.getFullName()) + "\") " +
                                     "select event insert into " + outputStreamName + ";";
                             this.queryDefinitions.add(query);
                         }
@@ -241,7 +256,7 @@ public class SiddhiApp {
             Extract string value from WindowedValue object and pass to sink stream
              */
             String sinkStreamName = "textSinkStream";
-            String query = "from " + streamName + "#beam:sourcesink(event) select value insert into " + sinkStreamName + ";";
+            String query = "from " + streamName + "#beam:sink(event) select value insert into " + sinkStreamName + ";";
             this.queryDefinitions.add(query);
 
             /*
