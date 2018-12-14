@@ -21,23 +21,22 @@ package org.wso2.beam.runner.siddhi;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.values.PCollection;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExecutionContext {
 
     private DirectGraph graph;
-    private HashMap<PCollection, CommittedBundle> bundles = new HashMap<>();
-    private HashMap<PCollection, CommittedBundle> rootBundles = new HashMap<>();
-//    private Iterator rootBundlesIterator;
+    private Map<PCollection, CommittedBundle> bundles = new HashMap<>();
+    private Map<PCollection, CommittedBundle> rootBundles = new HashMap<>();
     private static final ExecutionContext context = new ExecutionContext();
-//    private AppliedPTransform currentTransform;
-//    private PCollection finalCollection;
     private HashMap<String, AppliedPTransform> transformsMap = new HashMap<>();
     private HashMap<String, PCollection> collectionsMap = new HashMap<>();
 
     private ExecutionContext() {}
 
-    public void setGraph(DirectGraph graph) {
+    void setGraph(DirectGraph graph) {
         this.graph = graph;
     }
 
@@ -45,76 +44,24 @@ public class ExecutionContext {
         return context;
     }
 
-    public void addRootBundle(CommittedBundle bundle) {
+    void addRootBundle(CommittedBundle bundle) {
         this.bundles.put(bundle.getPCollection(), bundle);
         this.rootBundles.put(bundle.getPCollection(), bundle);
     }
 
-//    public CommittedBundle getBundle(PCollection key) {
-//        return this.bundles.get(key);
-//    }
-//
-//    public CommittedBundle getPendingRootBundle() {
-//        if (this.rootBundlesIterator == null) {
-//            this.rootBundlesIterator = this.rootBundles.values().iterator();
-//        }
-//        return getRootBundle();
-//    }
-
-//    private CommittedBundle getRootBundle() {
-//        return (CommittedBundle) this.rootBundlesIterator.next();
-//    }
-
-    public Collection getRootBundles() {
+    Collection<CommittedBundle> getRootBundles() {
         return rootBundles.values();
     }
 
-//    public void addOutputBundle(CommittedBundle bundle) {
-//        this.bundles.put(bundle.getPCollection(), bundle);
-//    }
-
-//    public CommittedBundle getFinalBundle() {
-//        for ( Iterator iter = this.bundles.values().iterator(); iter.hasNext(); ) {
-//            CommittedBundle currentBundle = (CommittedBundle) iter.next();
-//            if (currentBundle.getPCollection().getName().equals("Writefile/WriteFiles/WriteUnshardedBundlesToTempFiles/WriteUnshardedBundles.unwrittenRecords")) {
-//                Queue values = currentBundle.getValues();
-//                WindowedValue value = (WindowedValue) values.poll();
-//                ArrayList list = new ArrayList();
-//                list.add(value.getValue());
-//                WindowedValue newValue = WindowedValue.timestampedValueInGlobalWindow(list, value.getTimestamp());
-//                CommittedBundle<WindowedValue> newBundle = new CommittedBundle(currentBundle.getPCollection());
-//                newBundle.addItem(newValue);
-//                return newBundle;
-//            }
-//        }
-//        return null;
-//    }
-
-//    public void setStartTransform(AppliedPTransform transform) {
-//        this.currentTransform = transform;
-//    }
-//
-//    public AppliedPTransform getStartTransform() {
-//        return this.currentTransform;
-//    }
-//
-    public DirectGraph getGraph() {
+    DirectGraph getGraph() {
         return this.graph;
     }
-//
-//    public void setFinalCollection(PCollection collection) {
-//        this.finalCollection = collection;
-//    }
-//
-//    public PCollection getFinalCollection() {
-//        return this.finalCollection;
-//    }
 
-    public void setTransformsMap(HashMap<String, AppliedPTransform> map) {
+    void setTransformsMap(HashMap<String, AppliedPTransform> map) {
         this.transformsMap = map;
     }
 
-    public void setCollectionsMap(HashMap<String, PCollection> map) {
+    void setCollectionsMap(HashMap<String, PCollection> map) {
         this.collectionsMap = map;
     }
 

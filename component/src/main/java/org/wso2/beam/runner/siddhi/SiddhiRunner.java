@@ -46,7 +46,7 @@ public class SiddhiRunner extends PipelineRunner<PipelineResult> {
         GraphVisitor graphVisitor = new GraphVisitor();
         pipeline.traverseTopologically(graphVisitor);
         DirectGraph graph = graphVisitor.getGraph();
-        SiddhiExecutorService executor = SiddhiExecutorService.create(targetParallelism);
+        SiddhiExecutorService executor = new SiddhiExecutorService(targetParallelism);
         executor.start(graph);
         return null;
     }

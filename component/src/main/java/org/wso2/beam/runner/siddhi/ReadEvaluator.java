@@ -24,24 +24,23 @@ import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PValue;
 
-import java.util.Iterator;
+class ReadEvaluator<T> {
 
-public class ReadEvaluator<T> {
+    private AppliedPTransform<PBegin, PCollection<T>, PTransform<PBegin, PCollection<T>>> transform;
 
-    AppliedPTransform<PBegin, PCollection<T>, PTransform<PBegin, PCollection<T>>> transform;
-
-    public ReadEvaluator(AppliedPTransform<PBegin, PCollection<T>, PTransform<PBegin, PCollection<T>>> transform) {
+    ReadEvaluator(AppliedPTransform<PBegin, PCollection<T>, PTransform<PBegin, PCollection<T>>> transform) {
         this.transform = transform;
     }
 
-    public void execute(int parallels) throws Exception {
+    void execute(int parallels) throws Exception {
         Read.Bounded boundedInput = (Read.Bounded) this.transform.getTransform();
         BoundedSource<T> source = boundedInput.getSource();
         SourceWrapper sourceWrapper = new SourceWrapper(source, parallels, transform.getPipeline().getOptions());
         ExecutionContext context = ExecutionContext.getContext();
-        for (Iterator iter = this.transform.getOutputs().values().iterator(); iter.hasNext();) {
-            CommittedBundle<SourceWrapper> bundle = new CommittedBundle<>((PCollection) iter.next());
+        for (PValue collection: this.transform.getOutputs().values()) {
+            CommittedBundle<SourceWrapper> bundle = new CommittedBundle<>((PCollection) collection);
             bundle.addItem(sourceWrapper);
             context.addRootBundle(bundle);
         }

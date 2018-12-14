@@ -21,63 +21,57 @@ package org.wso2.beam.runner.siddhi;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Iterator;
-import java.util.List;
 
-public class SiddhiExecutorService {
+import java.io.IOException;
 
-    private static final Logger LOG = LoggerFactory.getLogger(SiddhiExecutorService.class);
+class SiddhiExecutorService {
+
+    private static final Logger log = LoggerFactory.getLogger(SiddhiExecutorService.class);
     private final int targetParallelism;
 
-    public static SiddhiExecutorService create(int targetParallelism) {
-        return new SiddhiExecutorService(targetParallelism);
-    }
-
-    private SiddhiExecutorService(int targetParallelism) {
+    SiddhiExecutorService(int targetParallelism) {
         this.targetParallelism = targetParallelism;
     }
 
-    public void start(DirectGraph graph) {
-        LOG.info("Starting Siddhi Runner");
+    void start(DirectGraph graph) {
+        log.info("Starting Siddhi Runner");
+        ExecutionContext context = ExecutionContext.getContext();
+        context.setGraph(graph);
         try {
             /*
              * Generate sources from root transforms
              */
-            ExecutionContext context = ExecutionContext.getContext();
-            context.setGraph(graph);
-            for (Iterator iter = graph.getRootTransforms().iterator(); iter.hasNext(); ) {
-                AppliedPTransform rootTransform = (AppliedPTransform) iter.next();
+            //TODO use singleton or static class
+            for (AppliedPTransform rootTransform: graph.getRootTransforms()) {
                 ReadEvaluator evaluator = new ReadEvaluator(rootTransform);
                 evaluator.execute(this.targetParallelism);
             }
-
             /*
             Create SiddhiAppRuntime
              */
-            SiddhiApp executionRuntime = new SiddhiApp();
+            SiddhiAppContainer executionRuntime = new SiddhiAppContainer();
             executionRuntime.createSiddhiQuery();
             context.setTransformsMap(executionRuntime.getTransformsMap());
             context.setCollectionsMap(executionRuntime.getCollectionsMap());
             executionRuntime.createSiddhiRuntime();
-            executionRuntime.setBundle(new CommittedBundle(null));
+//            executionRuntime.setBundle(new CommittedBundle(null));
 
             /*
-            Emit elements to SiddhiApp
+            Emit elements to SiddhiAppContainer
              */
-            for (Iterator roots = context.getRootBundles().iterator(); roots.hasNext(); ) {
-                CommittedBundle<SourceWrapper> rootBundle = (CommittedBundle<SourceWrapper>) roots.next();
+            log.info("Executing pipeline");
+            for (CommittedBundle<SourceWrapper> rootBundle: context.getRootBundles()) {
                 SourceWrapper source = rootBundle.getSourceWrapper();
                 source.open();
-                List<AppliedPTransform<?, ?, ?>> transforms = graph.getPerElementConsumers(rootBundle.getPCollection());
-                for ( Iterator iter = transforms.iterator(); iter.hasNext(); ) {
-                    AppliedPTransform transform = (AppliedPTransform) iter.next();
-                    String inputStream = SiddhiApp.generateTransformName(transform.getFullName()) + "Stream";
+                for (AppliedPTransform transform: graph.getPerElementConsumers(rootBundle.getPCollection())) {
+                    String inputStream = SiddhiAppContainer.generateTransformName(transform.getFullName()) + "Stream";
                     source.run(executionRuntime.getSiddhiRuntime().getInputHandler(inputStream));
                 }
             }
-            LOG.info("Executing pipeline");
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IOException exception) {
+            log.error("IOException ", exception.getMessage());
+        } catch (Exception exception) {
+            log.error("Exception ", exception.getMessage());
         }
     }
 

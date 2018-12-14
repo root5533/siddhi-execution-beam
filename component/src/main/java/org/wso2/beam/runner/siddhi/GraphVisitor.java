@@ -30,45 +30,42 @@ import org.apache.beam.sdk.values.PInput;
 import org.apache.beam.sdk.values.PValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
 
     private static final Logger LOG = LoggerFactory.getLogger(GraphVisitor.class);
 //    private Map<AppliedPTransform<?, ?, ?>, String> stepNames = new HashMap();
-    private Set<AppliedPTransform<?, ?, ?>> rootTransforms = new HashSet();
+    private Set<AppliedPTransform<?, ?, ?>> rootTransforms = new HashSet<>();
     private ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers = ArrayListMultimap.create();
     private ListMultimap<PValue, AppliedPTransform<?, ?, ?>> allConsumers = ArrayListMultimap.create();
 //    private Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers = new HashMap();
-    private int numTransforms = 0;
-    private int depth;
+//    private int numTransforms = 0;
+//    private int depth;
 
     public CompositeBehavior enterCompositeTransform(Node node) {
         if (node.getTransform() instanceof TextIO.Write) {
             AppliedPTransform<?, ?, ?> appliedPTransform = this.getAppliedTransform(node);
 //            this.stepNames.put(appliedPTransform, this.genStepName());
             Collection<PValue> mainInputs = TransformInputs.nonAdditionalInputs(node.toAppliedPTransform(this.getPipeline()));
-            Iterator iter = mainInputs.iterator();
-            PValue value;
-            while(iter.hasNext()) {
-                value = (PValue) iter.next();
-                this.perElementConsumers.put(value, appliedPTransform);
+            for (PValue pValue: mainInputs) {
+                this.perElementConsumers.put(pValue, appliedPTransform);
             }
-            iter = node.getInputs().values().iterator();
-            while(iter.hasNext()) {
-                value = (PValue) iter.next();
-                this.allConsumers.put(value, appliedPTransform);
+            for (PValue pValue: node.getInputs().values()) {
+                this.allConsumers.put(pValue, appliedPTransform);
             }
             return CompositeBehavior.DO_NOT_ENTER_TRANSFORM;
         }
 //        LOG.info("{} enterCompositeTransform- {}", genSpaces(this.depth), node.getFullName());
-        ++this.depth;
+//        ++this.depth;
         return CompositeBehavior.ENTER_TRANSFORM;
     }
 
     public void leaveCompositeTransform(Node node) {
-        --this.depth;
+//        --this.depth;
 //        LOG.info("{} leaveCompositeTransform- {}", genSpaces(this.depth), node.getFullName());
     }
 

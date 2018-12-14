@@ -27,20 +27,21 @@ import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class SourceWrapper<OutputT> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SourceWrapper.class);
-    List<? extends BoundedSource<OutputT>> splitSources;
+    private static final Logger log = LoggerFactory.getLogger(SourceWrapper.class);
+    private List<? extends BoundedSource<OutputT>> splitSources;
     private boolean isOpen = false;
-    PipelineOptions options;
-    List<BoundedSource<OutputT>> localSplitSources;
-    List<BoundedReader<OutputT>> localReaders;
-    List<Event> elements = new ArrayList<>();
+    private PipelineOptions options;
+    private List<BoundedSource<OutputT>> localSplitSources;
+    private List<BoundedReader<OutputT>> localReaders;
+    private List<Event> elements = new ArrayList<>();
 
-    public SourceWrapper(BoundedSource source, int parallelism, PipelineOptions options) throws Exception {
+    SourceWrapper(BoundedSource source, int parallelism, PipelineOptions options) throws Exception {
         this.options = options;
         long estimatedBytes = source.getEstimatedSizeBytes(options);
         long bytesPerBundle = estimatedBytes / (long) parallelism;
@@ -49,32 +50,36 @@ public class SourceWrapper<OutputT> {
         this.localReaders = new ArrayList<>();
     }
 
-    public void open() throws Exception {
+    void open() throws IOException {
         this.isOpen = true;
-        for ( int i = 0; i < this.splitSources.size(); i++ ) {
-            BoundedSource<OutputT> source = (BoundedSource) this.splitSources.get(i);
+        for (BoundedSource<OutputT> source: this.splitSources) {
             BoundedReader<OutputT> reader = source.createReader(this.options);
             this.localSplitSources.add(source);
             this.localReaders.add(reader);
         }
     }
 
-    public void run(InputHandler inputHandler) throws Exception {
+    void run(InputHandler inputHandler) {
 
-        /**
-         *Run the source to emit each element to DoFnOperator delegate
+        /*
+         Run the source to emit each element to DoFnOperator delegate
          */
-        for (int i=0; i<this.localReaders.size(); i++) {
-            BoundedReader<OutputT> reader = localReaders.get(i);
-            boolean hasData = reader.start();
-            while (hasData) {
+        try {
+            for (BoundedReader<OutputT> reader: this.localReaders) {
+                boolean hasData = reader.start();
+                while (hasData) {
 //                this.emitElement(inputHandler, reader);
-                WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-                this.convertToEvent(elem);
-                hasData = reader.advance();
+                    WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
+                    this.convertToEvent(elem);
+                    hasData = reader.advance();
+                }
             }
+            this.emitElements(inputHandler);
+        } catch (InterruptedException exception) {
+            log.error("Interrupted Exception : ", exception.getMessage());
+        } catch (IOException exception) {
+            log.error("IOException", exception.getMessage());
         }
-        this.emitElements(inputHandler);
 
     }
 
@@ -83,7 +88,7 @@ public class SourceWrapper<OutputT> {
 //        inputHandler.send(new Object[]{elem});
 //    }
 
-    private void emitElements(InputHandler inputHandler) throws Exception {
+    private void emitElements(InputHandler inputHandler) throws InterruptedException {
         Event[] stream = elements.toArray(new Event[0]);
         inputHandler.send(stream);
     }
