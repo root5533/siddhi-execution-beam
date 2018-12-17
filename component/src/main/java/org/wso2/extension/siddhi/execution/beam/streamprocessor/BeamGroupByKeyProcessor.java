@@ -69,8 +69,8 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         synchronized (this) {
-            ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
             HashMap<K, ArrayList<V>> groupByKey = new HashMap();
             try {
                 while (streamEventChunk.hasNext()) {
@@ -99,12 +99,11 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
                     streamEvent.setOutputData(WindowedValue.valueInGlobalWindow(kv), 0);
                     complexEventChunk.add(streamEvent);
                 }
-                nextProcessor.process(complexEventChunk);
-//            groupByKey.clear();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+        nextProcessor.process(complexEventChunk);
 
     }
 

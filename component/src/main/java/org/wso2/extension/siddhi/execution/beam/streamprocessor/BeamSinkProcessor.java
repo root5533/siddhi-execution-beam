@@ -69,8 +69,8 @@ public class BeamSinkProcessor<V> extends StreamProcessor {
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
+        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         synchronized (this) {
-            ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
             try {
                 while (streamEventChunk.hasNext()) {
                     StreamEvent event = streamEventChunk.next();
@@ -83,12 +83,11 @@ public class BeamSinkProcessor<V> extends StreamProcessor {
                         complexEventChunk.add(streamEvent);
                     }
                 }
-                nextProcessor.process(complexEventChunk);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
+        nextProcessor.process(complexEventChunk);
     }
 
 
