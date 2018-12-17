@@ -40,7 +40,7 @@ public class FlattenWithWindow
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
-        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America and the Caribbean", "Australia and Oceania", "Sub-Saharan Africa"};
+        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
 
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
@@ -63,7 +63,7 @@ public class FlattenWithWindow
                 String[] details = iter.next();
                 total_profit += Float.parseFloat(details[details.length - 1]) / 1000000;
             }
-            String result = input.getKey().trim() + " region profits : $ " + total_profit + " Million";
+            String result = input.getKey().trim() + " " + " region profits : $ " + total_profit + " Million";
             return result;
         }
 

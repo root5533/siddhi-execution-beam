@@ -63,44 +63,47 @@ import java.util.*;
 public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeamGroupByKeyProcessor.class);
-    private HashMap<K, ArrayList<V>> groupByKey = new HashMap();
+//    private HashMap<K, ArrayList<V>> groupByKey = new HashMap();
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
-        try {
-            while (streamEventChunk.hasNext()) {
-                StreamEvent event = streamEventChunk.next();
-                for (int i=0; i<event.getOutputData().length; i++) {
-                    if (event.getOutputData()[i] instanceof WindowedValue) {
-                        KV element = (KV) ((WindowedValue) event.getOutputData()[i]).getValue();
-                        if (this.groupByKey.containsKey(element.getKey())) {
-                            ArrayList<V> items = this.groupByKey.get(element.getKey());
-                            items.add((V) element.getValue());
-                            this.groupByKey.put((K) element.getKey(), items);
-                        } else {
-                            ArrayList<V> item = new ArrayList<>();
-                            item.add((V) element.getValue());
-                            this.groupByKey.put((K) element.getKey(), item);
+        synchronized (this) {
+            ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+            HashMap<K, ArrayList<V>> groupByKey = new HashMap();
+            try {
+                while (streamEventChunk.hasNext()) {
+                    StreamEvent event = streamEventChunk.next();
+                    for (int i = 0; i < event.getOutputData().length; i++) {
+                        if (event.getOutputData()[i] instanceof WindowedValue) {
+                            KV element = (KV) ((WindowedValue) event.getOutputData()[i]).getValue();
+                            if (groupByKey.containsKey(element.getKey())) {
+                                ArrayList<V> items = groupByKey.get(element.getKey());
+                                items.add((V) element.getValue());
+                                groupByKey.put((K) element.getKey(), items);
+                            } else {
+                                ArrayList<V> item = new ArrayList<>();
+                                item.add((V) element.getValue());
+                                groupByKey.put((K) element.getKey(), item);
+                            }
                         }
                     }
                 }
+                for (Iterator iter = groupByKey.entrySet().iterator(); iter.hasNext(); ) {
+                    Map.Entry map = (Map.Entry) iter.next();
+                    K key = (K) map.getKey();
+                    ArrayList<V> value = (ArrayList<V>) map.getValue();
+                    KV kv = KV.of(key, value);
+                    StreamEvent streamEvent = new StreamEvent(0, 0, 1);
+                    streamEvent.setOutputData(WindowedValue.valueInGlobalWindow(kv), 0);
+                    complexEventChunk.add(streamEvent);
+                }
+                nextProcessor.process(complexEventChunk);
+//            groupByKey.clear();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            for (Iterator iter = this.groupByKey.entrySet().iterator(); iter.hasNext();) {
-                 Map.Entry map = (Map.Entry) iter.next();
-                 K key = (K) map.getKey();
-                 ArrayList<V> value = (ArrayList<V>) map.getValue();
-                 KV kv = KV.of(key, value);
-                 StreamEvent streamEvent = new StreamEvent(0,0,1);
-                 streamEvent.setOutputData(WindowedValue.valueInGlobalWindow(kv), 0);
-                 complexEventChunk.add(streamEvent);
-            }
-            nextProcessor.process(complexEventChunk);
-            this.groupByKey.clear();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
     }

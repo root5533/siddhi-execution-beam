@@ -69,22 +69,24 @@ public class BeamSinkProcessor<V> extends StreamProcessor {
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
-        try {
-            while(streamEventChunk.hasNext()) {
-                StreamEvent event = streamEventChunk.next();
-                for (int i = 0; i < event.getBeforeWindowData().length; i++) {
-                    WindowedValue element = (WindowedValue) event.getBeforeWindowData()[i];
-                    String newValue = (String) element.getValue();
-                    Object[] outputObject = {newValue};
-                    StreamEvent streamEvent = new StreamEvent(0, 0, 1);
-                    streamEvent.setOutputData(outputObject);
-                    complexEventChunk.add(streamEvent);
+        synchronized (this) {
+            ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+            try {
+                while (streamEventChunk.hasNext()) {
+                    StreamEvent event = streamEventChunk.next();
+                    for (int i = 0; i < event.getBeforeWindowData().length; i++) {
+                        WindowedValue element = (WindowedValue) event.getBeforeWindowData()[i];
+                        String newValue = (String) element.getValue();
+                        Object[] outputObject = {newValue};
+                        StreamEvent streamEvent = new StreamEvent(0, 0, 1);
+                        streamEvent.setOutputData(outputObject);
+                        complexEventChunk.add(streamEvent);
+                    }
                 }
+                nextProcessor.process(complexEventChunk);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            nextProcessor.process(complexEventChunk);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
     }

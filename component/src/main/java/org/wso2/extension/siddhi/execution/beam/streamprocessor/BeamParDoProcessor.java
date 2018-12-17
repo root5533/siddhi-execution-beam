@@ -79,32 +79,33 @@ public class BeamParDoProcessor extends StreamProcessor {
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-//        LOG.info("Processing element in >>>>> " + this.beamTransform);
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
-        try {
-            while (streamEventChunk.hasNext()) {
-                StreamEvent event = streamEventChunk.next();
-                if (((WindowedValue) event.getOutputData()[0]).getValue() instanceof FileBasedSink.FileResult) {
-                    this.fileWriteFlag = true;
-                    fileResultArray.add((FileBasedSink.FileResult) ((WindowedValue) event.getOutputData()[0]).getValue());
-                } else {
-                    for (int i = 0; i < event.getOutputData().length; i++) {
-                        if (event.getOutputData()[i] instanceof WindowedValue) {
-                            this.operator.processElement((WindowedValue) event.getOutputData()[i], complexEventChunk);
+        synchronized (this) {
+            ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+            try {
+                while (streamEventChunk.hasNext()) {
+                    StreamEvent event = streamEventChunk.next();
+                    if (((WindowedValue) event.getOutputData()[0]).getValue() instanceof FileBasedSink.FileResult) {
+                        this.fileWriteFlag = true;
+                        fileResultArray.add((FileBasedSink.FileResult) ((WindowedValue) event.getOutputData()[0]).getValue());
+                    } else {
+                        for (int i = 0; i < event.getOutputData().length; i++) {
+                            if (event.getOutputData()[i] instanceof WindowedValue) {
+                                this.operator.processElement((WindowedValue) event.getOutputData()[i], complexEventChunk);
+                            }
                         }
                     }
                 }
+                if (this.fileWriteFlag == true) {
+                    WindowedValue newElement = WindowedValue.valueInGlobalWindow(this.fileResultArray);
+                    this.operator.processElement(newElement, complexEventChunk);
+                    this.fileResultArray.clear();
+                }
+                this.operator.finish();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                nextProcessor.process(complexEventChunk);
             }
-            if (this.fileWriteFlag == true) {
-                WindowedValue newElement = WindowedValue.valueInGlobalWindow(this.fileResultArray);
-                this.operator.processElement(newElement, complexEventChunk);
-                this.fileResultArray.clear();
-            }
-            this.operator.finish();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            nextProcessor.process(complexEventChunk);
         }
 
     }

@@ -37,7 +37,7 @@ public class FlattenWithoutWindow
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
-        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America and the Caribbean", "Australia and Oceania", "Sub-Saharan Africa"};
+        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
 
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
