@@ -69,9 +69,9 @@ import java.util.Map;
 
 public class BeamParDoProcessor extends StreamProcessor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeamParDoProcessor.class);
-    private String beamTransform;
+    private static final Logger log = LoggerFactory.getLogger(BeamParDoProcessor.class);
     private SiddhiDoFnOperator operator;
+    private ExpressionExecutor eventExecutor;
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
@@ -82,11 +82,8 @@ public class BeamParDoProcessor extends StreamProcessor {
             try {
                 while (streamEventChunk.hasNext()) {
                     StreamEvent event = streamEventChunk.next();
-                    for (int i = 0; i < event.getOutputData().length; i++) {
-                        if (event.getOutputData()[i] instanceof WindowedValue) {
-                            this.operator.processElement((WindowedValue) event.getOutputData()[i], complexEventChunk);
-                        }
-                    }
+                    WindowedValue value = (WindowedValue) this.eventExecutor.execute(event);
+                    this.operator.processElement(value, complexEventChunk);
                 }
                 this.operator.finish();
             } catch (Exception e) {
@@ -107,22 +104,26 @@ public class BeamParDoProcessor extends StreamProcessor {
             throw new SiddhiAppCreationException("Only 2 parameters can be specified for BeamExecutionProcessor");
         }
 
+        if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
+            this.eventExecutor = attributeExpressionExecutors[0];
+        } else {
+            throw new SiddhiAppCreationException("First parameter must be of type Object");
+        }
+
         if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.STRING) {
             /**
              * Get beam transform here and create DoFnOperator
              */
             try {
-                this.beamTransform = ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue().toString();
+                String beamTransform = ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue().toString();
                 ExecutionContext context = ExecutionContext.getContext();
-                AppliedPTransform transform = context.getTransfromFromName(this.beamTransform);
-                PCollection collection = context.getCollectionFromName(this.beamTransform);
-                SiddhiDoFnOperator operator;
-                operator = new SiddhiDoFnOperator(transform, collection);
+                AppliedPTransform transform = context.getTransfromFromName(beamTransform);
+                PCollection collection = context.getCollectionFromName(beamTransform);
+                this.operator = new SiddhiDoFnOperator(transform, collection);
                 operator.createRunner();
                 operator.start();
-                this.operator = operator;
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         } else {
             throw new SiddhiAppCreationException("Second parameter must be of type String");
@@ -160,6 +161,7 @@ public class BeamParDoProcessor extends StreamProcessor {
      */
     @Override
     public Map<String, Object> currentState() {
+
         return null;
     }
 

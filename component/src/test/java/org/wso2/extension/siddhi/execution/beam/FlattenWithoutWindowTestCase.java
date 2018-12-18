@@ -16,33 +16,40 @@
  * under the License.
  */
 
-package org.wso2;
+package org.wso2.extension.siddhi.execution.beam;
 
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
-import org.apache.beam.sdk.options.*;
-import org.apache.beam.sdk.transforms.*;
+import org.apache.beam.sdk.options.PipelineOptionsFactory;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.Flatten;
+import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.MapElements;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PCollectionList;
+import org.testng.annotations.Test;
 import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
 import org.wso2.beam.runner.siddhi.SiddhiRunner;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
-
-public class GroupingByKey
+public class FlattenWithoutWindowTestCase
 {
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
-        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America and the Caribbean", "Australia and Oceania", "Sub-Saharan Africa"};
+        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
 
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
             String[] words = element.split(",");
             if (Arrays.asList(regions).contains(words[0].trim())) {
-                KV<String, String[]> kv = KV.of(words[0], Arrays.copyOfRange(words, 1, words.length));
+                KV<String, String[]> kv = KV.of(words[0].trim(), Arrays.copyOfRange(words, 1, words.length));
                 out.output(kv);
             }
         }
@@ -68,15 +75,15 @@ public class GroupingByKey
     private static class CSVFilterRegion extends PTransform<PCollection<String>, PCollection<KV<String, String[]>>> {
 
         public PCollection<KV<String, String[]>> expand(PCollection<String> lines) {
-            PCollection<KV<String, String[]>> filtered = lines.apply(ParDo.of(new CheckElement()));
-            return filtered;
+            return lines.apply(ParDo.of(new CheckElement()));
         }
 
     }
 
-    public static void main( String[] args )
+    @Test
+    public static void flattenWithoutWindowTest()
     {
-        SiddhiPipelineOptions options = PipelineOptionsFactory.fromArgs(args).as(SiddhiPipelineOptions.class);
+        SiddhiPipelineOptions options = PipelineOptionsFactory.as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runCSVDemo(options);
     }
@@ -84,11 +91,15 @@ public class GroupingByKey
     private static void runCSVDemo(SiddhiPipelineOptions options) {
 
         Pipeline pipe = Pipeline.create(options);
-        pipe.apply("Readfile", TextIO.read().from(options.getInputFile()))
-                .apply(new CSVFilterRegion())
-                .apply(GroupByKey.<String, String[]>create())
-                .apply(MapElements.via(new FindKeyValueFn()))
-                .apply("Writefile", TextIO.write().to(options.getOutput()));
+        PCollection<KV<String, String[]>> collection_1 = pipe.apply("Readfile", TextIO.read().from("/home/tuan/WSO2/inputs/input-small.csv"))
+                .apply(new CSVFilterRegion());
+        PCollection<KV<String, String[]>> collection_2 = pipe.apply("Readfile", TextIO.read().from("/home/tuan/WSO2/inputs/test-input.csv"))
+                .apply(new CSVFilterRegion());
+        PCollectionList<KV<String, String[]>> collectionList = PCollectionList.of(collection_1).and(collection_2);
+        PCollection<KV<String, String[]>> merged = collectionList.apply(Flatten.pCollections());
+        merged.apply(GroupByKey.create()).apply(MapElements.via(new FindKeyValueFn()))
+            .apply(TextIO.write().to(options.getOutput() + "FlattenWithoutWindow"));
+
         pipe.run();
     }
 }

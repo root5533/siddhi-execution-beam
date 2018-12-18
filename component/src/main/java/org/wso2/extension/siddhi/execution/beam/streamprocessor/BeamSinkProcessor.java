@@ -56,7 +56,7 @@ import java.util.*;
                         "define stream outputStream\n" +
                         "@info(name = 'query1')\n" +
                         "from inputStream#beam:sink(event)\n" +
-                        "select value\n" +
+                        "select value, \n" +
                         "insert into outputStream;",
                 description = "This query will extract String value from event and sent to file sink stream")
 )
@@ -64,6 +64,7 @@ import java.util.*;
 public class BeamSinkProcessor<V> extends StreamProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeamSinkProcessor.class);
+    private ExpressionExecutor eventExecutor;
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
@@ -74,14 +75,12 @@ public class BeamSinkProcessor<V> extends StreamProcessor {
             try {
                 while (streamEventChunk.hasNext()) {
                     StreamEvent event = streamEventChunk.next();
-                    for (int i = 0; i < event.getBeforeWindowData().length; i++) {
-                        WindowedValue element = (WindowedValue) event.getBeforeWindowData()[i];
-                        String newValue = (String) element.getValue();
-                        Object[] outputObject = {newValue};
-                        StreamEvent streamEvent = new StreamEvent(0, 0, 1);
-                        streamEvent.setOutputData(outputObject);
-                        complexEventChunk.add(streamEvent);
-                    }
+                    WindowedValue element = (WindowedValue) this.eventExecutor.execute(event);
+                    String newValue = (String) element.getValue();
+                    Object[] outputObject = {newValue};
+                    StreamEvent streamEvent = new StreamEvent(0, 0, 1);
+                    streamEvent.setOutputData(outputObject);
+                    complexEventChunk.add(streamEvent);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -103,7 +102,9 @@ public class BeamSinkProcessor<V> extends StreamProcessor {
         } else {
             if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
                 attributes.add(new Attribute("value", Attribute.Type.STRING));
+                this.eventExecutor = attributeExpressionExecutors[0];
             }
+
         }
 
         return attributes;

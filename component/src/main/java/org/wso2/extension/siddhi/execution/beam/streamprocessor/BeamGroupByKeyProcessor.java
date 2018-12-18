@@ -62,8 +62,8 @@ import java.util.*;
 
 public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BeamGroupByKeyProcessor.class);
-//    private HashMap<K, ArrayList<V>> groupByKey = new HashMap();
+    private static final Logger log = LoggerFactory.getLogger(BeamGroupByKeyProcessor.class);
+    private ExpressionExecutor eventExecutor;
 
     @Override
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
@@ -75,23 +75,19 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
             try {
                 while (streamEventChunk.hasNext()) {
                     StreamEvent event = streamEventChunk.next();
-                    for (int i = 0; i < event.getOutputData().length; i++) {
-                        if (event.getOutputData()[i] instanceof WindowedValue) {
-                            KV element = (KV) ((WindowedValue) event.getOutputData()[i]).getValue();
-                            if (groupByKey.containsKey(element.getKey())) {
-                                ArrayList<V> items = groupByKey.get(element.getKey());
-                                items.add((V) element.getValue());
-                                groupByKey.put((K) element.getKey(), items);
-                            } else {
-                                ArrayList<V> item = new ArrayList<>();
-                                item.add((V) element.getValue());
-                                groupByKey.put((K) element.getKey(), item);
-                            }
-                        }
+                    WindowedValue value = (WindowedValue) this.eventExecutor.execute(event);
+                    KV element = (KV) value.getValue();
+                    if (groupByKey.containsKey(element.getKey())) {
+                        ArrayList<V> items = groupByKey.get(element.getKey());
+                        items.add((V) element.getValue());
+                        groupByKey.put((K) element.getKey(), items);
+                    } else {
+                        ArrayList<V> item = new ArrayList<>();
+                        item.add((V) element.getValue());
+                        groupByKey.put((K) element.getKey(), item);
                     }
                 }
-                for (Iterator iter = groupByKey.entrySet().iterator(); iter.hasNext(); ) {
-                    Map.Entry map = (Map.Entry) iter.next();
+                for (Map.Entry map: groupByKey.entrySet()) {
                     K key = (K) map.getKey();
                     ArrayList<V> value = (ArrayList<V>) map.getValue();
                     KV kv = KV.of(key, value);
@@ -100,7 +96,7 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
                     complexEventChunk.add(streamEvent);
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error(e.getMessage());
             }
         }
         nextProcessor.process(complexEventChunk);
@@ -117,6 +113,12 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
 
         if (attributeExpressionLength != 1) {
             throw new SiddhiAppCreationException("Only 1 parameter can be specified for BeamGroupByKeyProcessor");
+        }
+
+        if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
+            this.eventExecutor = attributeExpressionExecutors[0];
+        } else {
+            throw new SiddhiAppCreationException("First parameter should be of type Object");
         }
 
         return attributes;
