@@ -35,13 +35,12 @@ class SiddhiExecutorService {
 
     void start(DirectGraph graph) {
         log.info("Starting Siddhi Runner");
-        ExecutionContext context = ExecutionContext.getContext();
+        ExecutionContext context = ExecutionContext.getInstance();
         context.setGraph(graph);
         try {
             /*
              * Generate sources from root transforms
              */
-            //TODO use singleton or static class
             for (AppliedPTransform rootTransform: graph.getRootTransforms()) {
                 ReadEvaluator evaluator = new ReadEvaluator(rootTransform);
                 evaluator.execute(this.targetParallelism);

@@ -38,7 +38,7 @@ class ReadEvaluator<T> {
         Read.Bounded boundedInput = (Read.Bounded) this.transform.getTransform();
         BoundedSource<T> source = boundedInput.getSource();
         SourceWrapper sourceWrapper = new SourceWrapper(source, parallels, transform.getPipeline().getOptions());
-        ExecutionContext context = ExecutionContext.getContext();
+        ExecutionContext context = ExecutionContext.getInstance();
         for (PValue collection: this.transform.getOutputs().values()) {
             CommittedBundle<SourceWrapper> bundle = new CommittedBundle<>((PCollection) collection);
             bundle.addItem(sourceWrapper);

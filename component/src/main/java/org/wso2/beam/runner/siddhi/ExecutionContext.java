@@ -27,10 +27,10 @@ import java.util.Map;
 
 public class ExecutionContext {
 
+    private static final ExecutionContext context = new ExecutionContext();
     private DirectGraph graph;
     private Map<PCollection, CommittedBundle> bundles = new HashMap<>();
     private Map<PCollection, CommittedBundle> rootBundles = new HashMap<>();
-    private static final ExecutionContext context = new ExecutionContext();
     private HashMap<String, AppliedPTransform> transformsMap = new HashMap<>();
     private HashMap<String, PCollection> collectionsMap = new HashMap<>();
 
@@ -40,7 +40,7 @@ public class ExecutionContext {
         this.graph = graph;
     }
 
-    public static ExecutionContext getContext() {
+    public static ExecutionContext getInstance() {
         return context;
     }
 

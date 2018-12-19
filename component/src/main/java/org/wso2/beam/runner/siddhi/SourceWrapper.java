@@ -35,7 +35,6 @@ public class SourceWrapper<OutputT> {
 
     private static final Logger log = LoggerFactory.getLogger(SourceWrapper.class);
     private List<? extends BoundedSource<OutputT>> splitSources;
-    private boolean isOpen = false;
     private PipelineOptions options;
     private List<BoundedSource<OutputT>> localSplitSources;
     private List<BoundedReader<OutputT>> localReaders;
@@ -51,7 +50,6 @@ public class SourceWrapper<OutputT> {
     }
 
     void open() throws IOException {
-        this.isOpen = true;
         for (BoundedSource<OutputT> source: this.splitSources) {
             BoundedReader<OutputT> reader = source.createReader(this.options);
             this.localSplitSources.add(source);
@@ -68,7 +66,6 @@ public class SourceWrapper<OutputT> {
             for (BoundedReader<OutputT> reader: this.localReaders) {
                 boolean hasData = reader.start();
                 while (hasData) {
-//                this.emitElement(inputHandler, reader);
                     WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
                     this.convertToEvent(elem);
                     hasData = reader.advance();
@@ -82,11 +79,6 @@ public class SourceWrapper<OutputT> {
         }
 
     }
-
-//    private void emitElement (InputHandler inputHandler, BoundedReader reader) throws Exception {
-//        WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
-//        inputHandler.send(new Object[]{elem});
-//    }
 
     private void emitElements(InputHandler inputHandler) throws InterruptedException {
         Event[] stream = elements.toArray(new Event[0]);

@@ -58,7 +58,7 @@ class SiddhiAppContainer {
 
     public void createSiddhiQuery() {
         log.info("Creating Siddhi Query");
-        ExecutionContext context = ExecutionContext.getContext();
+        ExecutionContext context = ExecutionContext.getInstance();
         this.graph = context.getGraph();
         for (CommittedBundle rootBundle: context.getRootBundles()) {
             for (AppliedPTransform transform: graph.getPerElementConsumers(rootBundle.getPCollection())) {

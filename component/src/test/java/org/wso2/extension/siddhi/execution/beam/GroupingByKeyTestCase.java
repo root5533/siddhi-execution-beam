@@ -64,8 +64,7 @@ public class GroupingByKeyTestCase
                 String[] details = iter.next();
                 total_profit += Float.parseFloat(details[details.length - 1]) / 1000000;
             }
-            String result = input.getKey().trim() + " region profits : $ " + total_profit + " Million";
-            return result;
+            return input.getKey().trim() + " region profits : $ " + total_profit + " Million";
         }
 
     }
@@ -73,8 +72,7 @@ public class GroupingByKeyTestCase
     private static class CSVFilterRegion extends PTransform<PCollection<String>, PCollection<KV<String, String[]>>> {
 
         public PCollection<KV<String, String[]>> expand(PCollection<String> lines) {
-            PCollection<KV<String, String[]>> filtered = lines.apply(ParDo.of(new CheckElement()));
-            return filtered;
+            return lines.apply(ParDo.of(new CheckElement()));
         }
 
     }

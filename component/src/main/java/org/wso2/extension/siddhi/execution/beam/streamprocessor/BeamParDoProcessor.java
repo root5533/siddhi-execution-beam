@@ -18,7 +18,6 @@
 
 package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 
-import org.apache.beam.sdk.io.FileBasedSink;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.PCollection;
@@ -111,12 +110,12 @@ public class BeamParDoProcessor extends StreamProcessor {
         }
 
         if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.STRING) {
-            /**
+            /*
              * Get beam transform here and create DoFnOperator
              */
             try {
                 String beamTransform = ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue().toString();
-                ExecutionContext context = ExecutionContext.getContext();
+                ExecutionContext context = ExecutionContext.getInstance();
                 AppliedPTransform transform = context.getTransfromFromName(beamTransform);
                 PCollection collection = context.getCollectionFromName(beamTransform);
                 this.operator = new SiddhiDoFnOperator(transform, collection);

@@ -37,7 +37,7 @@ import java.util.Set;
 
 public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
 
-    private static final Logger LOG = LoggerFactory.getLogger(GraphVisitor.class);
+    private static final Logger log = LoggerFactory.getLogger(GraphVisitor.class);
 //    private Map<AppliedPTransform<?, ?, ?>, String> stepNames = new HashMap();
     private Set<AppliedPTransform<?, ?, ?>> rootTransforms = new HashSet<>();
     private ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers = ArrayListMultimap.create();

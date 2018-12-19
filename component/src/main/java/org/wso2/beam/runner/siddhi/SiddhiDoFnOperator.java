@@ -38,20 +38,20 @@ import java.util.stream.Collectors;
 
 public class SiddhiDoFnOperator<InputT, OutputT> {
 
-    protected final AppliedPTransform<?, ?, ?> transform;
-    protected DoFnRunner<InputT, OutputT> delegate;
-    protected PCollection collection;
-    protected ComplexEventChunk complexEventChunk;
+    private final AppliedPTransform<?, ?, ?> transform;
+    private DoFnRunner<InputT, OutputT> delegate;
+    private PCollection collection;
+    private ComplexEventChunk complexEventChunk;
     protected PipelineOptions options;
-    protected SideInputReader sideInputReader;
-    protected OutputManager outputManager;
-    protected TupleTag<OutputT> mainOutputTag;
-    protected List<TupleTag<?>> additionalOutputTags;
-    protected StepContext stepContext;
-    protected Coder<InputT> inputCoder;
-    protected Map<TupleTag<?>, Coder<?>> outputCoders;
-    protected WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy;
-    protected DoFn<InputT, OutputT> fn;
+    private SideInputReader sideInputReader;
+    private OutputManager outputManager;
+    private TupleTag<OutputT> mainOutputTag;
+    private List<TupleTag<?>> additionalOutputTags;
+    private StepContext stepContext;
+    private Coder<InputT> inputCoder;
+    private Map<TupleTag<?>, Coder<?>> outputCoders;
+    private WindowingStrategy<?, ? extends BoundedWindow> windowingStrategy;
+    private DoFn<InputT, OutputT> fn;
 
     public SiddhiDoFnOperator(AppliedPTransform transform, PCollection collection) {
         this.transform = transform;
@@ -66,11 +66,12 @@ public class SiddhiDoFnOperator<InputT, OutputT> {
         this.additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
         this.stepContext = SiddhiDoFnOperator.LocalStepContext.create();
         this.inputCoder = this.collection.getCoder();
-        this.outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
-            return (TupleTag)e.getKey();
-        }, (e) -> {
-            return ((PCollection)e.getValue()).getCoder();
-        }));
+//        this.outputCoders = (Map)this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
+//            return (TupleTag)e.getKey();
+//        }, (e) -> {
+//            return ((PCollection)e.getValue()).getCoder();
+//        }));
+        this.outputCoders = null;
         this.windowingStrategy = this.collection.getWindowingStrategy();
         this.fn = this.getDoFn();
         this.delegate = new SimpleDoFnRunner(options, fn, sideInputReader, outputManager, mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);

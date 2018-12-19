@@ -16,7 +16,6 @@
  * under the License.
  */
 
-//TODO rename packages and move samples to test
 package org.wso2.extension.siddhi.execution.beam;
 
 import org.apache.beam.sdk.Pipeline;

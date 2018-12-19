@@ -66,8 +66,7 @@ public class FlattenWithoutWindowTestCase
                 String[] details = iter.next();
                 total_profit += Float.parseFloat(details[details.length - 1]) / 1000000;
             }
-            String result = input.getKey().trim() + " region profits : $ " + total_profit + " Million";
-            return result;
+            return input.getKey().trim() + " region profits : $ " + total_profit + " Million";
         }
 
     }

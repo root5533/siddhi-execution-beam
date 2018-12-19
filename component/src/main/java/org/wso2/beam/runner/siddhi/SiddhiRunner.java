@@ -28,17 +28,16 @@ import org.slf4j.LoggerFactory;
 
 public class SiddhiRunner extends PipelineRunner<PipelineResult> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SiddhiRunner.class);
-    private final SiddhiPipelineOptions options;
-
+    private static final Logger log = LoggerFactory.getLogger(SiddhiRunner.class);
+//    private final SiddhiPipelineOptions options;
+//
     public static SiddhiRunner fromOptions(PipelineOptions options) {
-        SiddhiPipelineOptions localOptions = PipelineOptionsValidator.validate(SiddhiPipelineOptions.class, options);
-        return new SiddhiRunner(localOptions);
+        PipelineOptionsValidator.validate(SiddhiPipelineOptions.class, options);
+        return new SiddhiRunner();
     }
-
-    private SiddhiRunner(SiddhiPipelineOptions options) {
-        this.options = options;
-    }
+//
+    private SiddhiRunner() { }
+//        this.options = options;
 
     @Override
     public PipelineResult run(Pipeline pipeline) {
