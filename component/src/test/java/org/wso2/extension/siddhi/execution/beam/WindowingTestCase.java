@@ -39,13 +39,13 @@ import org.wso2.beam.runner.siddhi.SiddhiRunner;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public class WindowingTestCase
-{
+public class WindowingTestCase {
 
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
-        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
+        String[] regions = {"Europe", "Asia", "Middle East and North Africa",
+                "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
 
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
@@ -63,12 +63,12 @@ public class WindowingTestCase
         @Override
         public String apply(KV<String, Iterable<String[]>> input) {
             Iterator<String[]> iter = input.getValue().iterator();
-            float total_profit = 0;
+            float totalProfit = 0;
             while (iter.hasNext()) {
                 String[] details = iter.next();
-                total_profit += Float.parseFloat(details[details.length - 1]) / 1000000;
+                totalProfit += Float.parseFloat(details[details.length - 1]) / 1000000;
             }
-            return input.getKey().trim() + " region profits : $ " + total_profit + " Million";
+            return input.getKey().trim() + " region profits : $ " + totalProfit + " Million";
         }
 
     }
@@ -82,8 +82,7 @@ public class WindowingTestCase
     }
 
     @Test
-    public static void windowingTest() throws InterruptedException
-    {
+    public static void windowingTest() throws InterruptedException {
         SiddhiPipelineOptions options = PipelineOptionsFactory.as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runCSVDemo(options);

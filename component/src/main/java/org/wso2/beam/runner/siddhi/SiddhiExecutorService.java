@@ -21,10 +21,12 @@ package org.wso2.beam.runner.siddhi;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 
-class SiddhiExecutorService {
+/**
+ *
+ */
+public class SiddhiExecutorService {
 
     private static final Logger log = LoggerFactory.getLogger(SiddhiExecutorService.class);
     private final int targetParallelism;

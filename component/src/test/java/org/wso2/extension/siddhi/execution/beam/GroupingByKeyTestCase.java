@@ -36,18 +36,19 @@ import org.wso2.beam.runner.siddhi.SiddhiRunner;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public class GroupingByKeyTestCase
-{
+public class GroupingByKeyTestCase {
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
-        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
+        String[] regions = {"Europe", "Asia", "Middle East and North Africa",
+                "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
 
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
             String[] words = element.split(",");
             if (Arrays.asList(regions).contains(words[0].trim())) {
-                KV<String, String[]> kv = KV.of(words[0], Arrays.copyOfRange(words, 1, words.length));
+                KV<String, String[]> kv = KV.of(words[0],
+                        Arrays.copyOfRange(words, 1, words.length));
                 out.output(kv);
             }
         }
@@ -59,12 +60,12 @@ public class GroupingByKeyTestCase
         @Override
         public String apply(KV<String, Iterable<String[]>> input) {
             Iterator<String[]> iter = input.getValue().iterator();
-            float total_profit = 0;
+            float totalProfit = 0;
             while (iter.hasNext()) {
                 String[] details = iter.next();
-                total_profit += Float.parseFloat(details[details.length - 1]) / 1000000;
+                totalProfit += Float.parseFloat(details[details.length - 1]) / 1000000;
             }
-            return input.getKey().trim() + " region profits : $ " + total_profit + " Million";
+            return input.getKey().trim() + " region profits : $ " + totalProfit + " Million";
         }
 
     }
@@ -78,8 +79,7 @@ public class GroupingByKeyTestCase
     }
 
     @Test
-    public static void groupByKeyTest()
-    {
+    public static void groupByKeyTest() {
         SiddhiPipelineOptions options = PipelineOptionsFactory.as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runCSVDemo(options);

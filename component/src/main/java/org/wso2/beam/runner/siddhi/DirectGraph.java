@@ -18,9 +18,7 @@
 
 package org.wso2.beam.runner.siddhi;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.values.PInput;
 import org.apache.beam.sdk.values.PValue;
@@ -28,7 +26,7 @@ import java.util.Collection;
 import java.util.Set;
 
 /**
- * Methods for interacting with the underlying structure of a {@link Pipeline} that is being
+ * Methods for interacting with the underlying structure of a {@link org.apache.beam.sdk.Pipeline} that is being
  * executed with the {@link SiddhiRunner}.
  */
 public class DirectGraph {

@@ -18,17 +18,16 @@
 
 package org.wso2.beam.runner.siddhi;
 
-import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.runners.AppliedPTransform;
-import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PCollection;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Keep a mapping of siddhi stream name and it's relevant {@link PTransform} and {@link PCollection} and
- * root bundles of the provided {@link Pipeline}.
+ * Keep a mapping of siddhi stream name and it's relevant
+ * {@link org.apache.beam.sdk.transforms.PTransform} and {@link PCollection} and
+ * root bundles of the provided {@link org.apache.beam.sdk.Pipeline}.
  */
 public class ExecutionContext {
 

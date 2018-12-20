@@ -23,21 +23,21 @@ import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.PipelineRunner;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * A {@link PipelineRunner} that executes the operations in the pipeline by translating them
+ * to a Siddhi Query and deploy in a local or remote {@link org.wso2.siddhi.core.SiddhiAppRuntime}.
+ */
 public class SiddhiRunner extends PipelineRunner<PipelineResult> {
 
-    private static final Logger log = LoggerFactory.getLogger(SiddhiRunner.class);
-//    private final SiddhiPipelineOptions options;
-//
+//    private static final Logger log = LoggerFactory.getLogger(SiddhiRunner.class);
+
     public static SiddhiRunner fromOptions(PipelineOptions options) {
         PipelineOptionsValidator.validate(SiddhiPipelineOptions.class, options);
         return new SiddhiRunner();
     }
-//
+
     private SiddhiRunner() { }
-//        this.options = options;
 
     @Override
 //    TODO nned to learn to handle errors

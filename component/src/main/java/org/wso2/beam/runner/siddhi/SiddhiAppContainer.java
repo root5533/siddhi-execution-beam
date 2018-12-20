@@ -18,7 +18,6 @@
 
 package org.wso2.beam.runner.siddhi;
 
-import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.TextIO;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.runners.AppliedPTransform;
@@ -46,7 +45,7 @@ import java.util.Map;
 
 /**
  * This is where Siddhi query is generated depending on {@link DirectGraph} which in turn is created
- * depending on structure of {@link Pipeline}.
+ * depending on structure of {@link org.apache.beam.sdk.Pipeline}.
  */
 public class SiddhiAppContainer {
 

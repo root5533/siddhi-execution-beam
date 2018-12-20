@@ -47,6 +47,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Following extension executes Beam ParDo transform in Siddhi context.
+ */
 @Extension(
         name = "pardo",
         namespace = "beam",
@@ -54,7 +57,8 @@ import java.util.Map;
                 " for WindowedValue objects when executing a Beam pipeline.",
         parameters = {
                 @Parameter(name = "event",
-                        description = "All the events of type WindowedValue arriving in chunk to execute ParDo transform",
+                        description = "All the events of type WindowedValue arriving" +
+                                " in chunk to execute ParDo transform",
                         type = {DataType.OBJECT})
         },
         examples = @Example(
@@ -113,7 +117,8 @@ public class BeamParDoProcessor extends StreamProcessor {
              * Get beam transform here and create DoFnOperator
              */
             try {
-                String beamTransform = ((ConstantExpressionExecutor) attributeExpressionExecutors[1]).getValue().toString();
+                String beamTransform = ((ConstantExpressionExecutor) attributeExpressionExecutors[1])
+                        .getValue().toString();
                 ExecutionContext context = ExecutionContext.getInstance();
                 AppliedPTransform transform = context.getTransfromFromName(beamTransform);
                 PCollection collection = context.getCollectionFromName(beamTransform);
@@ -141,7 +146,7 @@ public class BeamParDoProcessor extends StreamProcessor {
     }
 
     /**
-     * This will be called only once and this can be used to release
+     * This will be called only once and this can be used to release.
      * the acquired resources for processing.
      * This will be called before shutting down the system.
      */
@@ -152,7 +157,7 @@ public class BeamParDoProcessor extends StreamProcessor {
 
     /**
      * Used to collect the serializable state of the processing element, that need to be
-     * persisted for reconstructing the element to the same state on a different point of time
+     * persisted for reconstructing the element to the same state on a different point of time.
      *
      * @return stateful objects of the processing element as an map
      */

@@ -38,12 +38,12 @@ import org.wso2.beam.runner.siddhi.SiddhiRunner;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public class FlattenWithoutWindowTestCase
-{
+public class FlattenWithoutWindowTestCase {
 
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
-        String[] regions = {"Europe", "Asia", "Middle East and North Africa", "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
+        String[] regions = {"Europe", "Asia", "Middle East and North Africa",
+                "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
 
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
@@ -61,12 +61,12 @@ public class FlattenWithoutWindowTestCase
         @Override
         public String apply(KV<String, Iterable<String[]>> input) {
             Iterator<String[]> iter = input.getValue().iterator();
-            float total_profit = 0;
+            float totalProfit = 0f;
             while (iter.hasNext()) {
                 String[] details = iter.next();
-                total_profit += Float.parseFloat(details[details.length - 1]) / 1000000;
+                totalProfit += Float.parseFloat(details[details.length - 1]) / 1000000;
             }
-            return input.getKey().trim() + " region profits : $ " + total_profit + " Million";
+            return input.getKey().trim() + " region profits : $ " + totalProfit + " Million";
         }
 
     }
@@ -80,8 +80,7 @@ public class FlattenWithoutWindowTestCase
     }
 
     @Test
-    public static void flattenWithoutWindowTest()
-    {
+    public static void flattenWithoutWindowTest() {
         SiddhiPipelineOptions options = PipelineOptionsFactory.as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
         runCSVDemo(options);
@@ -90,12 +89,16 @@ public class FlattenWithoutWindowTestCase
     private static void runCSVDemo(SiddhiPipelineOptions options) {
 
         Pipeline pipe = Pipeline.create(options);
-        PCollection<KV<String, String[]>> collection_1 = pipe.apply("Readfile", TextIO.read().from("/home/tuan/WSO2/inputs/input-small.csv"))
+        PCollection<KV<String, String[]>> collectionOne = pipe.apply("Readfile", TextIO.read()
+                .from("/home/tuan/WSO2/inputs/input-small.csv"))
                 .apply(new CSVFilterRegion());
-        PCollection<KV<String, String[]>> collection_2 = pipe.apply("Readfile", TextIO.read().from("/home/tuan/WSO2/inputs/test-input.csv"))
+        PCollection<KV<String, String[]>> collectionTwo = pipe.apply("Readfile", TextIO.read()
+                .from("/home/tuan/WSO2/inputs/test-input.csv"))
                 .apply(new CSVFilterRegion());
-        PCollectionList<KV<String, String[]>> collectionList = PCollectionList.of(collection_1).and(collection_2);
-        PCollection<KV<String, String[]>> merged = collectionList.apply(Flatten.pCollections());
+        PCollectionList<KV<String, String[]>> collectionList = PCollectionList
+                .of(collectionOne).and(collectionTwo);
+        PCollection<KV<String, String[]>> merged = collectionList
+                .apply(Flatten.pCollections());
         merged.apply(GroupByKey.create()).apply(MapElements.via(new FindKeyValueFn()))
             .apply(TextIO.write().to(options.getOutput() + "FlattenWithoutWindow"));
 

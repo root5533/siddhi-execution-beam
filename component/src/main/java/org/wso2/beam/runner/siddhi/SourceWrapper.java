@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -37,19 +37,19 @@ import java.util.List;
 public class SourceWrapper<OutputT> {
 
     private static final Logger log = LoggerFactory.getLogger(SourceWrapper.class);
-    private List<BoundedSource<OutputT>> splitSources;
+    private List<? extends BoundedSource<OutputT>> splitSources;
     private PipelineOptions options;
     private List<BoundedSource<OutputT>> localSplitSources;
     private List<BoundedReader<OutputT>> localReaders;
-    private List<Event> elements = new ArrayList<>();
+    private List<Event> elements = new LinkedList<>();
 
-    SourceWrapper(BoundedSource source, int parallelism, PipelineOptions options) throws Exception {
+    public SourceWrapper(BoundedSource<OutputT> source, int parallelism, PipelineOptions options) throws Exception {
         this.options = options;
         long estimatedBytes = source.getEstimatedSizeBytes(options);
         long bytesPerBundle = estimatedBytes / (long) parallelism;
         this.splitSources = source.split(bytesPerBundle, options);
-        this.localSplitSources = new ArrayList<>();
-        this.localReaders = new ArrayList<>();
+        this.localSplitSources = new LinkedList<>();
+        this.localReaders = new LinkedList<>();
     }
 
     public void open() throws IOException {
@@ -60,7 +60,6 @@ public class SourceWrapper<OutputT> {
         }
     }
 
-    //TODO access modifiers
     public void run(InputHandler inputHandler) {
 
         /*
@@ -70,7 +69,8 @@ public class SourceWrapper<OutputT> {
             for (BoundedReader<OutputT> reader: this.localReaders) {
                 boolean hasData = reader.start();
                 while (hasData) {
-                    WindowedValue elem = WindowedValue.timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
+                    WindowedValue elem = WindowedValue
+                            .timestampedValueInGlobalWindow(reader.getCurrent(), reader.getCurrentTimestamp());
                     this.convertToEvent(elem);
                     hasData = reader.advance();
                 }

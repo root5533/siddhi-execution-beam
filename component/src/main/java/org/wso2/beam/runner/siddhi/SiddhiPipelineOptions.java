@@ -22,6 +22,9 @@ import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.PipelineOptions;
 
+/**
+ * Custom configurations for Beam Pipelines.
+ */
 public interface SiddhiPipelineOptions extends PipelineOptions {
 
     @Description("Set input target")

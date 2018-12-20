@@ -38,8 +38,13 @@ import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
+/**
+ * Following extension extracts value from {@link WindowedValue} to send to a Siddhi sink.
+ */
 @Extension(
         name = "pardo",
         namespace = "beam",
@@ -52,7 +57,8 @@ import java.util.*;
         },
         examples = @Example(
                 syntax = "define stream inputStream (event object);\n" +
-                        "@sink(type='file', file.uri='/destination', append='true', @map(type='text', @payload('{{value}}') ))\n" +
+                        "@sink(type='file', file.uri='/destination', append='true', " +
+                        "@map(type='text', @payload('{{value}}') ))\n" +
                         "define stream outputStream\n" +
                         "@info(name = 'query1')\n" +
                         "from inputStream#beam:sink(event)\n" +
@@ -61,7 +67,7 @@ import java.util.*;
                 description = "This query will extract String value from event and sent to file sink stream")
 )
 
-public class BeamSinkProcessor<V> extends StreamProcessor {
+public class BeamSinkProcessor extends StreamProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(BeamSinkProcessor.class);
     private ExpressionExecutor eventExecutor;
@@ -72,18 +78,14 @@ public class BeamSinkProcessor<V> extends StreamProcessor {
 
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         synchronized (this) {
-            try {
-                while (streamEventChunk.hasNext()) {
-                    StreamEvent event = streamEventChunk.next();
-                    WindowedValue element = (WindowedValue) this.eventExecutor.execute(event);
-                    String newValue = (String) element.getValue();
-                    Object[] outputObject = {newValue};
-                    StreamEvent streamEvent = new StreamEvent(0, 0, 1);
-                    streamEvent.setOutputData(outputObject);
-                    complexEventChunk.add(streamEvent);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            while (streamEventChunk.hasNext()) {
+                StreamEvent event = streamEventChunk.next();
+                WindowedValue element = (WindowedValue) this.eventExecutor.execute(event);
+                String newValue = (String) element.getValue();
+                Object[] outputObject = {newValue};
+                StreamEvent streamEvent = new StreamEvent(0, 0, 1);
+                streamEvent.setOutputData(outputObject);
+                complexEventChunk.add(streamEvent);
             }
         }
         nextProcessor.process(complexEventChunk);
@@ -95,7 +97,7 @@ public class BeamSinkProcessor<V> extends StreamProcessor {
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                    SiddhiAppContext siddhiAppContext) {
 
-        ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+        List<Attribute> attributes = new LinkedList<>();
 
         if (attributeExpressionLength != 1) {
             throw new SiddhiAppCreationException("Only 1 parameters can be specified for BeamSinkProcessor");
