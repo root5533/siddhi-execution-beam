@@ -26,15 +26,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.siddhi.core.event.Event;
 import org.wso2.siddhi.core.stream.input.InputHandler;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Construct a wrapper for {@link BoundedSource}.
+ * @param <OutputT>
+ */
 public class SourceWrapper<OutputT> {
 
     private static final Logger log = LoggerFactory.getLogger(SourceWrapper.class);
-    private List<? extends BoundedSource<OutputT>> splitSources;
+    private List<BoundedSource<OutputT>> splitSources;
     private PipelineOptions options;
     private List<BoundedSource<OutputT>> localSplitSources;
     private List<BoundedReader<OutputT>> localReaders;
@@ -49,7 +52,7 @@ public class SourceWrapper<OutputT> {
         this.localReaders = new ArrayList<>();
     }
 
-    void open() throws IOException {
+    public void open() throws IOException {
         for (BoundedSource<OutputT> source: this.splitSources) {
             BoundedReader<OutputT> reader = source.createReader(this.options);
             this.localSplitSources.add(source);
@@ -57,7 +60,8 @@ public class SourceWrapper<OutputT> {
         }
     }
 
-    void run(InputHandler inputHandler) {
+    //TODO access modifiers
+    public void run(InputHandler inputHandler) {
 
         /*
          Run the source to emit each element to DoFnOperator delegate
@@ -71,7 +75,9 @@ public class SourceWrapper<OutputT> {
                     hasData = reader.advance();
                 }
             }
+            //TODO change function
             this.emitElements(inputHandler);
+            //TODO add exception and look into interrupted exception handling
         } catch (InterruptedException exception) {
             log.error("Interrupted Exception : ", exception.getMessage());
         } catch (IOException exception) {

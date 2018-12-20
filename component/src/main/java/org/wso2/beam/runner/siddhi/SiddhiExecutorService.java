@@ -68,6 +68,7 @@ class SiddhiExecutorService {
                 }
             }
         } catch (IOException exception) {
+            //TODO more descriptive errors, print stacktrace
             log.error("IOException ", exception.getMessage());
         } catch (Exception exception) {
             log.error("Exception ", exception.getMessage());

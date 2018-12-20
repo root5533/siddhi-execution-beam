@@ -38,13 +38,14 @@ import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
 import org.wso2.siddhi.query.api.definition.AbstractDefinition;
 import org.wso2.siddhi.query.api.definition.Attribute;
+//TODO no wild card imports
 import java.util.*;
 
 
 @Extension(
         name = "groupbykey",
         namespace = "beam",
-        description = "This stream processor extension performs grouping of events by key.\n" +
+        description = "This stream processor extension performs grouping of events by key" +
                 " for WindowedValue objects when executing a Beam pipeline.",
         parameters = {
                 @Parameter(name = "event",
@@ -70,18 +71,24 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+        //TODO use lock instead
+        //TODO check thread safety
         synchronized (this) {
+            //TODO rename to groupByKeyMap move outside sync
             HashMap<K, ArrayList<V>> groupByKey = new HashMap();
             try {
                 while (streamEventChunk.hasNext()) {
                     StreamEvent event = streamEventChunk.next();
+                    //TODO rename to windowedValue
                     WindowedValue value = (WindowedValue) this.eventExecutor.execute(event);
+                    //TODO rename to keyValue element
                     KV element = (KV) value.getValue();
                     if (groupByKey.containsKey(element.getKey())) {
                         ArrayList<V> items = groupByKey.get(element.getKey());
                         items.add((V) element.getValue());
                         groupByKey.put((K) element.getKey(), items);
                     } else {
+                        //TODO use linkedlist for performance
                         ArrayList<V> item = new ArrayList<>();
                         item.add((V) element.getValue());
                         groupByKey.put((K) element.getKey(), item);
@@ -109,18 +116,23 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                    SiddhiAppContext siddhiAppContext) {
 
+        //TODO unnecessary array list
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
 
+        //TODO get length of attributeExpressionExecutors
         if (attributeExpressionLength != 1) {
-            throw new SiddhiAppCreationException("Only 1 parameter can be specified for BeamGroupByKeyProcessor");
+            //TODO provide details of given attribute.type
+            throw new SiddhiAppCreationException("Only one parameter can be specified for BeamGroupByKeyProcessor");
         }
 
         if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
             this.eventExecutor = attributeExpressionExecutors[0];
         } else {
+            //TODO more details of provided attribute
             throw new SiddhiAppCreationException("First parameter should be of type Object");
         }
 
+        //TODO return new
         return attributes;
     }
 

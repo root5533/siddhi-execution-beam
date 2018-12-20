@@ -40,6 +40,7 @@ public class SiddhiRunner extends PipelineRunner<PipelineResult> {
 //        this.options = options;
 
     @Override
+//    TODO nned to learn to handle errors
     public PipelineResult run(Pipeline pipeline) {
         int targetParallelism = 1;
         GraphVisitor graphVisitor = new GraphVisitor();

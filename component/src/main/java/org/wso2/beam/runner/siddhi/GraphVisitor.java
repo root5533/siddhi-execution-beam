@@ -18,8 +18,8 @@
 
 package org.wso2.beam.runner.siddhi;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.beam.runners.core.construction.TransformInputs;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.Read;
@@ -35,13 +35,18 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+/**
+ * This is a graph visitor which traverse the {@link Pipeline} to extract the transforms
+ * required by {@link SiddhiRunner} to execute user-provided {@link org.apache.beam.sdk.values.PCollection}
+ * based job to create {@link DirectGraph}.
+ */
 public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
 
     private static final Logger log = LoggerFactory.getLogger(GraphVisitor.class);
 //    private Map<AppliedPTransform<?, ?, ?>, String> stepNames = new HashMap();
     private Set<AppliedPTransform<?, ?, ?>> rootTransforms = new HashSet<>();
-    private ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers = ArrayListMultimap.create();
-    private ListMultimap<PValue, AppliedPTransform<?, ?, ?>> allConsumers = ArrayListMultimap.create();
+    private Multimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers = HashMultimap.create();
+    private Multimap<PValue, AppliedPTransform<?, ?, ?>> allConsumers = HashMultimap.create();
 //    private Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers = new HashMap();
 //    private int numTransforms = 0;
 //    private int depth;
@@ -50,7 +55,9 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
         if (node.getTransform() instanceof TextIO.Write) {
             AppliedPTransform<?, ?, ?> appliedPTransform = this.getAppliedTransform(node);
 //            this.stepNames.put(appliedPTransform, this.genStepName());
-            Collection<PValue> mainInputs = TransformInputs.nonAdditionalInputs(node.toAppliedPTransform(this.getPipeline()));
+            Collection<PValue> mainInputs = TransformInputs.nonAdditionalInputs(
+                    node.toAppliedPTransform(this.getPipeline())
+            );
             for (PValue pValue: mainInputs) {
                 this.perElementConsumers.put(pValue, appliedPTransform);
             }
@@ -72,25 +79,26 @@ public class GraphVisitor extends Pipeline.PipelineVisitor.Defaults {
     public void visitPrimitiveTransform(Node node) {
 //        LOG.info("{} visitPrimitiveTransform- {}", genSpaces(this.depth), node.getFullName());
 
-        AppliedPTransform<?, ?, ?> appliedPTransform = this.getAppliedTransform(node);
+        AppliedPTransform appliedPTransform = this.getAppliedTransform(node);
 //        this.stepNames.put(appliedPTransform, this.genStepName());
         if (node.getInputs().isEmpty()) {
             if (appliedPTransform.getTransform() instanceof Read.Bounded) {
                 this.rootTransforms.add(appliedPTransform);
             }
         } else {
-            Collection<PValue> mainInputs = TransformInputs.nonAdditionalInputs(node.toAppliedPTransform(this.getPipeline()));
-            if (!mainInputs.containsAll(node.getInputs().values())) {
-//                LOG.info("Inputs reduced to {} from {} by removing additional inputs", mainInputs, node.getInputs().values());
-            }
+            Collection<PValue> mainInputs = TransformInputs.nonAdditionalInputs(
+                    node.toAppliedPTransform(this.getPipeline())
+            );
+//            if (!mainInputs.containsAll(node.getInputs().values())) {
+//            }
             Iterator iter = mainInputs.iterator();
             PValue value;
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 value = (PValue) iter.next();
                 this.perElementConsumers.put(value, appliedPTransform);
             }
             iter = node.getInputs().values().iterator();
-            while(iter.hasNext()) {
+            while (iter.hasNext()) {
                 value = (PValue) iter.next();
                 this.allConsumers.put(value, appliedPTransform);
             }

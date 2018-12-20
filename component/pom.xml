@@ -26,6 +26,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <!--todo check artifact name-->
+    <!--todo add checkstyles-->
     <artifactId>siddhi-execution-beam</artifactId>
     <packaging>bundle</packaging>
     <name>Siddhi execution of Beam</name>
@@ -72,7 +73,6 @@
             <groupId>org.wso2.extension.siddhi.map.text</groupId>
             <artifactId>siddhi-map-text</artifactId>
         </dependency>
-
     </dependencies>
 
     <build>

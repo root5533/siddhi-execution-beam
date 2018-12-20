@@ -18,27 +18,32 @@
 
 package org.wso2.beam.runner.siddhi;
 
-import com.google.common.collect.ListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.values.PInput;
 import org.apache.beam.sdk.values.PValue;
-
-import java.util.List;
+import java.util.Collection;
 import java.util.Set;
 
+/**
+ * Methods for interacting with the underlying structure of a {@link Pipeline} that is being
+ * executed with the {@link SiddhiRunner}.
+ */
 public class DirectGraph {
 
 //    private final Map<PCollection<?>, AppliedPTransform<?, ?, ?>> producers;
-    private final ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers;
+    private final Multimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers;
     private final Set<AppliedPTransform<?, ?, ?>> rootTransforms;
 //    private final Map<AppliedPTransform<?, ?, ?>, String> stepNames;
 
-    public static DirectGraph create(ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers,
+    public static DirectGraph create(Multimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers,
                                      Set<AppliedPTransform<?, ?, ?>> rootTransforms) {
         return new DirectGraph(perElementConsumers, rootTransforms);
     }
 
-    private DirectGraph(ListMultimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers,
+    private DirectGraph(Multimap<PInput, AppliedPTransform<?, ?, ?>> perElementConsumers,
                         Set<AppliedPTransform<?, ?, ?>> rootTransforms) {
 //        this.producers = producers;
         this.perElementConsumers = perElementConsumers;
@@ -50,7 +55,7 @@ public class DirectGraph {
         return this.rootTransforms;
     }
 
-    public List<AppliedPTransform<?, ?, ?>> getPerElementConsumers(PValue consumed) {
+    public Collection<AppliedPTransform<?, ?, ?>> getPerElementConsumers(PValue consumed) {
         return this.perElementConsumers.get(consumed);
     }
 

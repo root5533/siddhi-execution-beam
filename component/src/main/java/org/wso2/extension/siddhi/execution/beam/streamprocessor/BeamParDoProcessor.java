@@ -76,18 +76,16 @@ public class BeamParDoProcessor extends StreamProcessor {
     protected void process(ComplexEventChunk<StreamEvent> streamEventChunk, Processor nextProcessor,
                            StreamEventCloner streamEventCloner, ComplexEventPopulater complexEventPopulater) {
 
-        ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
+        ComplexEventChunk<StreamEvent> complexEventChunk;
         synchronized (this) {
-            try {
-                while (streamEventChunk.hasNext()) {
-                    StreamEvent event = streamEventChunk.next();
-                    WindowedValue value = (WindowedValue) this.eventExecutor.execute(event);
-                    this.operator.processElement(value, complexEventChunk);
-                }
-                this.operator.finish();
-            } catch (Exception e) {
-                e.printStackTrace();
+            operator.start();
+            while (streamEventChunk.hasNext()) {
+                StreamEvent event = streamEventChunk.next();
+                WindowedValue value = (WindowedValue) this.eventExecutor.execute(event);
+                this.operator.processElement(value);
             }
+            this.operator.finish();
+            complexEventChunk = this.operator.getOutputChunk();
         }
         nextProcessor.process(complexEventChunk);
     }
@@ -109,6 +107,7 @@ public class BeamParDoProcessor extends StreamProcessor {
             throw new SiddhiAppCreationException("First parameter must be of type Object");
         }
 
+        //TODO check instance type(variable or constant)
         if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.STRING) {
             /*
              * Get beam transform here and create DoFnOperator
@@ -120,7 +119,6 @@ public class BeamParDoProcessor extends StreamProcessor {
                 PCollection collection = context.getCollectionFromName(beamTransform);
                 this.operator = new SiddhiDoFnOperator(transform, collection);
                 operator.createRunner();
-                operator.start();
             } catch (Exception e) {
                 log.error(e.getMessage());
             }

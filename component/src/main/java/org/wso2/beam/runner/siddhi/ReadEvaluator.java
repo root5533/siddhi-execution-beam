@@ -26,7 +26,11 @@ import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PValue;
 
-class ReadEvaluator<T> {
+/**
+ * This produces {@link Read.Bounded} from primitive {@link PTransform} and outputs to a {@link CommittedBundle}.
+ * @param <T> Type of records read by the source
+ */
+public class ReadEvaluator<T> {
 
     private AppliedPTransform<PBegin, PCollection<T>, PTransform<PBegin, PCollection<T>>> transform;
 
@@ -35,7 +39,7 @@ class ReadEvaluator<T> {
     }
 
     void execute(int parallels) throws Exception {
-        Read.Bounded boundedInput = (Read.Bounded) this.transform.getTransform();
+        Read.Bounded<T> boundedInput = (Read.Bounded<T>) this.transform.getTransform();
         BoundedSource<T> source = boundedInput.getSource();
         SourceWrapper sourceWrapper = new SourceWrapper(source, parallels, transform.getPipeline().getOptions());
         ExecutionContext context = ExecutionContext.getInstance();

@@ -18,21 +18,26 @@
 
 package org.wso2.beam.runner.siddhi;
 
+import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.runners.AppliedPTransform;
+import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PCollection;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Keep a mapping of siddhi stream name and it's relevant {@link PTransform} and {@link PCollection} and
+ * root bundles of the provided {@link Pipeline}.
+ */
 public class ExecutionContext {
 
     private static final ExecutionContext context = new ExecutionContext();
     private DirectGraph graph;
-    private Map<PCollection, CommittedBundle> bundles = new HashMap<>();
-    private Map<PCollection, CommittedBundle> rootBundles = new HashMap<>();
-    private HashMap<String, AppliedPTransform> transformsMap = new HashMap<>();
-    private HashMap<String, PCollection> collectionsMap = new HashMap<>();
+    private final Map<PCollection, CommittedBundle> bundles = new HashMap<>();
+    private final Map<PCollection, CommittedBundle> rootBundles = new HashMap<>();
+    private Map<String, AppliedPTransform> transformsMap;
+    private Map<String, PCollection> collectionsMap;
 
     private ExecutionContext() {}
 
@@ -57,11 +62,11 @@ public class ExecutionContext {
         return this.graph;
     }
 
-    void setTransformsMap(HashMap<String, AppliedPTransform> map) {
+    void setTransformsMap(Map<String, AppliedPTransform> map) {
         this.transformsMap = map;
     }
 
-    void setCollectionsMap(HashMap<String, PCollection> map) {
+    void setCollectionsMap(Map<String, PCollection> map) {
         this.collectionsMap = map;
     }
 

@@ -18,11 +18,15 @@
 
 package org.wso2.beam.runner.siddhi;
 
+import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PCollection;
-
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * Elements that are output by a {@link PTransform} gets collected here.
+ * @param <T> type of elements contained in this bundle
+ */
 public class CommittedBundle<T> {
 
     private PCollection bundle;
