@@ -124,6 +124,8 @@ public class SiddhiAppContainer {
                         String filePath = provider.get().toString();
                         this.queryDefinitions.add(generateSinkQuery(sinkType, streamName, sinkStreamName));
                         this.streamDefinitions.add(generateSinkStream(sinkType, sinkStreamName, filePath));
+                    } catch (NoSuchMethodException exception) {
+                        log.error(exception.getMessage());
                     } catch (Exception exception) {
                         log.error(exception.getMessage());
                     }

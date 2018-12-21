@@ -4,7 +4,7 @@
 
 ### groupbykey *<a target="_blank" href="https://wso2.github.io/siddhi/documentation/siddhi-4.0/#stream-processor">(Stream Processor)</a>*
 
-<p style="word-wrap: break-word">This stream processor extension performs grouping of events by key.<br>&nbsp;for WindowedValue objects when executing a Beam pipeline.</p>
+<p style="word-wrap: break-word">This stream processor extension performs grouping of events by key for WindowedValue objects when executing a Beam pipeline.</p>
 
 <span id="syntax" class="md-typeset" style="display: block; font-weight: bold;">Syntax</span>
 ```
@@ -79,7 +79,7 @@ define stream inputStream (event object);
 define stream outputStream
 @info(name = 'query1')
 from inputStream#beam:sink(event)
-select value
+select value, 
 insert into outputStream;
 ```
 <p style="word-wrap: break-word">This query will extract String value from event and sent to file sink stream</p>

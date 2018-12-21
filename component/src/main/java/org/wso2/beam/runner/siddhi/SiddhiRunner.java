@@ -21,8 +21,12 @@ package org.wso2.beam.runner.siddhi;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.PipelineRunner;
+import org.apache.beam.sdk.metrics.MetricResults;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsValidator;
+import org.joda.time.Duration;
+
+import java.io.IOException;
 
 /**
  * A {@link PipelineRunner} that executes the operations in the pipeline by translating them
@@ -48,7 +52,43 @@ public class SiddhiRunner extends PipelineRunner<PipelineResult> {
         DirectGraph graph = graphVisitor.getGraph();
         SiddhiExecutorService executor = new SiddhiExecutorService(targetParallelism);
         executor.start(graph);
-        return null;
+        return new SiddhiRunnerResult();
+    }
+
+    /**
+     *
+     */
+    public static class SiddhiRunnerResult implements PipelineResult {
+        private State state;
+
+        public SiddhiRunnerResult() {
+            this.state = State.RUNNING;
+        }
+
+        @Override
+        public State getState() {
+            return this.state;
+        }
+
+        @Override
+        public State cancel() throws IOException {
+            return this.state;
+        }
+
+        @Override
+        public State waitUntilFinish(Duration duration) {
+            return this.state;
+        }
+
+        @Override
+        public State waitUntilFinish() {
+            return this.state;
+        }
+
+        @Override
+        public MetricResults metrics() {
+            return new SiddhiMetrics();
+        }
     }
 
 }

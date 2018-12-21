@@ -35,8 +35,8 @@ public class ExecutionContext {
     private DirectGraph graph;
     private final Map<PCollection, CommittedBundle> bundles = new HashMap<>();
     private final Map<PCollection, CommittedBundle> rootBundles = new HashMap<>();
-    private Map<String, AppliedPTransform> transformsMap;
-    private Map<String, PCollection> collectionsMap;
+    private Map<String, AppliedPTransform> transformsMap = new HashMap<>();
+    private Map<String, PCollection> collectionsMap = new HashMap<>();
 
     private ExecutionContext() {}
 

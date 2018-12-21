@@ -123,7 +123,6 @@ public class BeamParDoProcessor extends StreamProcessor {
                 AppliedPTransform transform = context.getTransfromFromName(beamTransform);
                 PCollection collection = context.getCollectionFromName(beamTransform);
                 this.operator = new SiddhiDoFnOperator(transform, collection);
-                operator.createRunner();
             } catch (Exception e) {
                 log.error(e.getMessage());
             }

@@ -44,6 +44,7 @@ import org.wso2.siddhi.core.event.ComplexEventChunk;
 import org.wso2.siddhi.core.event.stream.StreamEvent;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Creates and manages {@link SimpleDoFnRunner} given the {@link PTransform} and {@link PCollection}
@@ -71,12 +72,9 @@ public class SiddhiDoFnOperator
     private DoFn<InputT, OutputT> fn;
 
     public SiddhiDoFnOperator(
-            AppliedPTransform<InputT, OutputT, TransformT> transform, PCollection<InputT> collection) {
+            AppliedPTransform<InputT, OutputT, TransformT> transform, PCollection<InputT> collection) throws Exception {
         this.transform = transform;
         this.collection = collection;
-    }
-
-    public void createRunner() throws Exception {
         this.options = this.transform.getPipeline().getOptions();
         this.sideInputReader = SiddhiDoFnOperator.LocalSideInputReader
                 .create(ParDoTranslation.getSideInputs(this.transform));
@@ -85,7 +83,11 @@ public class SiddhiDoFnOperator
         this.additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
         this.stepContext = SiddhiDoFnOperator.LocalStepContext.create();
         this.inputCoder = this.collection.getCoder();
-        this.outputCoders = null;
+        this.outputCoders = this.transform.getOutputs().entrySet().stream().collect(Collectors.toMap((e) -> {
+            return (TupleTag<?>) e.getKey();
+        }, (e) -> {
+            return ((PCollection<?>) e.getValue()).getCoder();
+        }));
         this.windowingStrategy = this.collection.getWindowingStrategy();
         this.fn = this.getDoFn();
         this.delegate = new SimpleDoFnRunner<InputT, OutputT>(options, fn, sideInputReader, outputManager,
@@ -137,12 +139,12 @@ public class SiddhiDoFnOperator
 
         @Override
         public StateInternals stateInternals() {
-            return null;
+            throw new UnsupportedOperationException("stateInternals is not supported");
         }
 
         @Override
         public TimerInternals timerInternals() {
-            return null;
+            throw new UnsupportedOperationException("timerInternals is not supported");
         }
     }
 
