@@ -5,11 +5,13 @@
 <suite name="Siddhi-Execution-Beam-Test-Suite">
     <test name="Siddhi-execution-beam-tests" enabled="true" preserve-order="true" parallel="false">
         <classes>
-            <class name="org.wso2.extension.siddhi.execution.beam.aggregate.TestCaseOfBeamAggregateFunction"/>
-            <class name="org.wso2.extension.siddhi.execution.beam.function.TestCaseOfBeamFunction"/>
-            <class name="org.wso2.extension.siddhi.execution.beam.streamfunction.TestCaseOfBeamStreamFunction"/>
-            <class name="org.wso2.extension.siddhi.execution.beam.streamprocessor.TestCaseOfBeamStreamProcessor"/>
-            <class name="org.wso2.extension.siddhi.execution.beam.window.TestCaseOfBeamWindow"/>
+            <!--<class name="org.wso2.extension.siddhi.execution.beam.streamprocessor.TestCaseOfBeamStreamProcessor"/>-->
+            <class name="org.wso2.extension.siddhi.execution.beam.MultiPardoTestCase"/>
+            <class name="org.wso2.extension.siddhi.execution.beam.FlattenWithoutWindowTestCase"/>
+            <class name="org.wso2.extension.siddhi.execution.beam.FlattenWithWindowTestCase"/>
+            <class name="org.wso2.extension.siddhi.execution.beam.GroupingByKeyTestCase"/>
+            <class name="org.wso2.extension.siddhi.execution.beam.PardoLetterCountTestCase"/>
+            <class name="org.wso2.extension.siddhi.execution.beam.WindowingTestCase"/>
         </classes>
     </test>
 </suite>
