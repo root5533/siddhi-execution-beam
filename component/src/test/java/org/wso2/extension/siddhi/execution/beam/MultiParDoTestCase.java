@@ -6,7 +6,10 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.commons.io.FileUtils;
 import org.testng.AssertJUnit;
+import org.testng.TestException;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
@@ -20,20 +23,25 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-public class SampleBeamTestCase {
+public class MultiParDoTestCase {
 
-    File sinkRoot;
-    String source, sink;
+    String rootPath, source, sink;
 
     @BeforeClass
     public void init() {
-        String workingdir = System.getProperty("user.dir");
-        System.out.println("system property path" + workingdir);
-        ClassLoader classLoader = SampleBeamTestCase.class.getClassLoader();
-        String rootPath = classLoader.getResource("files").getFile();
+        ClassLoader classLoader = MultiParDoTestCase.class.getClassLoader();
+        rootPath = classLoader.getResource("files").getFile();
         source = rootPath + "/parDo/sample.txt";
-        sink = rootPath = "/parDo/resultSample.txt";
-//        sinkRoot = new File(rootPath + "/parDo");
+        sink = rootPath + "/sink/resultSample.txt";
+    }
+
+    @AfterMethod
+    public void doAfterMethod() {
+        try {
+            FileUtils.deleteDirectory(new File(rootPath + "/sink"));
+        } catch (IOException e) {
+            throw new TestException("Failed to delete files in due to " + e.getMessage(), e);
+        }
     }
 
     private static class SplitString extends DoFn<String, String> {
@@ -68,21 +76,21 @@ public class SampleBeamTestCase {
         }
     }
 
-    private void runSimpleSiddhiApp(SiddhiPipelineOptions options) {
+    private void runMultiParDo(SiddhiPipelineOptions options) {
         Pipeline pipe = Pipeline.create(options);
         PCollection<String> col1 = pipe.apply(TextIO.read().from(source));
-        PCollection<String> col2 = col1.apply(ParDo.of(new SampleBeamTestCase.SplitString()));
-        PCollection<String> col3 = col2.apply(ParDo.of(new SampleBeamTestCase.FilterString()));
-        PCollection<String> col4 = col3.apply(ParDo.of(new SampleBeamTestCase.LetterCount()));
+        PCollection<String> col2 = col1.apply(ParDo.of(new MultiParDoTestCase.SplitString()));
+        PCollection<String> col3 = col2.apply(ParDo.of(new MultiParDoTestCase.FilterString()));
+        PCollection<String> col4 = col3.apply(ParDo.of(new MultiParDoTestCase.LetterCount()));
         col4.apply(TextIO.write().to(sink));
         pipe.run();
     }
 
     @Test
-    public void SampleTest() throws InterruptedException {
+    public void multiParDoTest() throws InterruptedException {
         SiddhiPipelineOptions options = PipelineOptionsFactory.as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
-        runSimpleSiddhiApp(options);
+        runMultiParDo(options);
         Thread.sleep(1000);
 
         int lineLength[] = {5, 5, 6, 6};
@@ -96,6 +104,8 @@ public class SampleBeamTestCase {
                     AssertJUnit.assertEquals(Integer.parseInt(line), lineLength[i]);
                     i++;
                 }
+            } else {
+                AssertJUnit.fail(sink + " is not a directory");
             }
         } catch (FileNotFoundException e) {
             AssertJUnit.fail(e.getMessage());

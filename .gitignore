@@ -3,3 +3,4 @@ outputs/
 input-large.csv
 input.csv
 .idea/workspace.xml
+target/
