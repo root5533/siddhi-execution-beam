@@ -3,8 +3,8 @@
   <component name="ChangeListManager">
     <list default="true" id="f58a62de-bc75-4ad9-aecf-16eb3e48a3b2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/component/src/test/resources/testng.xml" beforeDir="false" afterPath="$PROJECT_DIR$/component/src/test/resources/testng.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/checkstyle-cachefile" beforeDir="false" afterPath="$PROJECT_DIR$/target/checkstyle-cachefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/MultiPardoTestCase.java" beforeDir="false" afterPath="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/MultiPardoTestCase.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/siddhi-beam.txt" beforeDir="false" afterPath="$PROJECT_DIR$/siddhi-beam.txt" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/target/" />
     <ignored path="$PROJECT_DIR$/component/target/" />
@@ -55,11 +55,12 @@
           <entry key="dualPardoResult" value="2" />
           <entry key="groupByKeyResult" value="8" />
           <entry key="groupByKeyResult-00000-of-00001" value="3" />
-          <entry key="java" value="501" />
+          <entry key="html" value="2" />
+          <entry key="java" value="504" />
           <entry key="multiPardoResult" value="1" />
           <entry key="multiPardoResult-00000-of-00001" value="3" />
           <entry key="result-00000-of-00001" value="5" />
-          <entry key="txt" value="8" />
+          <entry key="txt" value="12" />
           <entry key="windowResult" value="1" />
           <entry key="windowResult-00000-of-00001" value="3" />
           <entry key="windowResult-00000-of-00002" value="1" />
@@ -67,16 +68,17 @@
           <entry key="windowResult-00001-of-00002" value="1" />
           <entry key="windowResult-00001-of-00003" value="1" />
           <entry key="windowResult-00002-of-00003" value="1" />
-          <entry key="xml" value="31" />
+          <entry key="xml" value="32" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
           <entry key="CLASS" value="108" />
           <entry key="CSV" value="1" />
-          <entry key="JAVA" value="501" />
-          <entry key="PLAIN_TEXT" value="41" />
-          <entry key="XML" value="31" />
+          <entry key="HTML" value="2" />
+          <entry key="JAVA" value="504" />
+          <entry key="PLAIN_TEXT" value="45" />
+          <entry key="XML" value="32" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
@@ -84,16 +86,18 @@
           <entry key="5d195025-425c-49e2-ad52-48162728ea93" value="1" />
           <entry key="class" value="2" />
           <entry key="dummy" value="163" />
-          <entry key="java" value="24111" />
-          <entry key="txt" value="20" />
+          <entry key="html" value="20" />
+          <entry key="java" value="25100" />
+          <entry key="txt" value="24" />
           <entry key="xml" value="524" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="CLASS" value="2" />
-          <entry key="JAVA" value="24111" />
-          <entry key="PLAIN_TEXT" value="184" />
+          <entry key="HTML" value="20" />
+          <entry key="JAVA" value="25100" />
+          <entry key="PLAIN_TEXT" value="188" />
           <entry key="XML" value="524" />
         </counts>
       </usages-collector>
@@ -167,28 +171,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/FlattenWithoutWindowTestCase.java">
+        <entry file="file://$PROJECT_DIR$/component/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="930">
-              <caret line="96" column="46" selection-start-line="96" selection-start-column="46" selection-end-line="96" selection-end-column="46" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/FlattenWithWindowTestCase.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="57" column="9" selection-start-line="57" selection-start-column="9" selection-end-line="57" selection-end-column="9" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/GroupingByKeyTestCase.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="630">
-              <caret line="74" column="61" selection-start-line="74" selection-start-column="61" selection-end-line="74" selection-end-column="61" />
+            <state relative-caret-position="1815">
+              <caret line="121" column="98" lean-forward="true" selection-start-line="121" selection-start-column="98" selection-end-line="121" selection-end-column="98" />
             </state>
           </provider>
         </entry>
@@ -196,8 +182,20 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/MultiPardoTestCase.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="475">
-              <caret line="48" column="57" lean-forward="true" selection-start-line="48" selection-start-column="57" selection-end-line="48" selection-end-column="57" />
+            <state relative-caret-position="210">
+              <caret line="42" column="9" lean-forward="true" selection-start-line="42" selection-start-column="9" selection-end-line="42" selection-end-column="9" />
+              <folding>
+                <element signature="imports" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/SampleBeamTestCase.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="711">
+              <caret line="102" column="102" lean-forward="true" selection-start-line="102" selection-start-column="102" selection-end-line="102" selection-end-column="102" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -206,19 +204,19 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/PardoLetterCountTestCase.java">
+        <entry file="file://$PROJECT_DIR$/component/src/test/resources/files/parDo/sample.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
+            <state relative-caret-position="15">
+              <caret line="1" column="16" selection-start-line="1" selection-start-column="16" selection-end-line="1" selection-end-column="16" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/WindowingTestCase.java">
+      <file pinned="false" current-in-tab="false">
+        <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/lang/ClassLoader.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-144">
-              <caret line="41" column="31" selection-start-line="41" selection-start-column="31" selection-end-line="41" selection-end-column="31" />
+            <state relative-caret-position="528">
+              <caret line="1090" column="22" selection-start-line="1090" selection-start-column="22" selection-end-line="1090" selection-end-column="22" />
             </state>
           </provider>
         </entry>
@@ -285,10 +283,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/extension/siddhi/execution/beam/streamprocessor/BeamGroupByKey.java" />
-        <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiTimerInternals.java" />
-        <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiStateInternals.java" />
-        <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/GroupByKeySiddhi.java" />
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/WindowDoFnOperator.java" />
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SingletonKeyedWorkItem.java" />
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/GroupDoFnOperator.java" />
@@ -309,7 +303,6 @@
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/ParDoLetterCount.java" />
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiApp.java" />
         <option value="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/GroupingByKey.java" />
-        <option value="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/MultiPardoTestCase.java" />
         <option value="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/ParDoLetterCountTestCase.java" />
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/FlattenWithoutWindow.java" />
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/FlattenWithWindow.java" />
@@ -336,6 +329,11 @@
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiRunner.java" />
         <option value="$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiMetrics.java" />
         <option value="$PROJECT_DIR$/component/src/test/resources/testng.xml" />
+        <option value="$PROJECT_DIR$/component/src/test/resources/files/index.html" />
+        <option value="$PROJECT_DIR$/siddhi-beam.txt" />
+        <option value="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/MultiPardoTestCase.java" />
+        <option value="$PROJECT_DIR$/component/src/test/resources/files/parDo/sample.txt" />
+        <option value="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/SampleBeamTestCase.java" />
       </list>
     </option>
   </component>
@@ -389,43 +387,6 @@
               <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
               <item name="component" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
-              <item name="component" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="wso2" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
-              <item name="component" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="wso2" type="462c0819:PsiDirectoryNode" />
-              <item name="siddhi" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
-              <item name="component" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="main" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="wso2" type="462c0819:PsiDirectoryNode" />
-              <item name="streamprocessor" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
-              <item name="component" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -444,16 +405,6 @@
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="java" type="462c0819:PsiDirectoryNode" />
               <item name="beam" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
-              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
-              <item name="component" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-              <item name="test" type="462c0819:PsiDirectoryNode" />
-              <item name="java" type="462c0819:PsiDirectoryNode" />
-              <item name="beam" type="462c0819:PsiDirectoryNode" />
-              <item name="streamprocessor" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
@@ -462,6 +413,36 @@
               <item name="src" type="462c0819:PsiDirectoryNode" />
               <item name="test" type="462c0819:PsiDirectoryNode" />
               <item name="resources" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="test" type="462c0819:PsiDirectoryNode" />
+              <item name="resources" type="462c0819:PsiDirectoryNode" />
+              <item name="parDo" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+              <item name="target" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+              <item name="target" type="462c0819:PsiDirectoryNode" />
+              <item name="test-classes" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="siddhi-execution-beam-parent" type="b2602c69:ProjectViewProjectNode" />
+              <item name="siddhi-execution-beam" type="462c0819:PsiDirectoryNode" />
+              <item name="component" type="462c0819:PsiDirectoryNode" />
+              <item name="target" type="462c0819:PsiDirectoryNode" />
+              <item name="test-classes" type="462c0819:PsiDirectoryNode" />
+              <item name="files" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -474,23 +455,24 @@
   </component>
   <component name="PropertiesComponent">
     <property name="SearchEverywhereHistoryKey" value="SiddhiExce&#9;PSI&#9;JAVA://org.wso2.siddhi.query.api.exception.SiddhiAppValidationException&#10;VariableEx&#9;PSI&#9;JAVA://org.wso2.siddhi.core.executor.VariableExpressionExecutor&#10;sink&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/wso2/siddhi/siddhi-core/4.2.40/siddhi-core-4.2.40.jar!/org/wso2/siddhi/core/stream/output/sink/Sink.class&#10;sin&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/wso2/siddhi/siddhi-core/4.2.40/siddhi-core-4.2.40-sources.jar!/org/wso2/siddhi/core/stream/output/sink/Sink.java&#10;comple&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/wso2/siddhi/siddhi-core/4.2.40/siddhi-core-4.2.40-sources.jar!/org/wso2/siddhi/core/event/ComplexEventChunk.java&#10;TextIO&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/apache/beam/beam-sdks-java-core/2.6.0/beam-sdks-java-core-2.6.0.jar!/org/apache/beam/sdk/io/TextIO.class&#10;Sidd&#9;FILE&#9;file:///home/tuan/WSO2/siddhi-execution-beam/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiApp.java&#10;WriteFiles&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/apache/beam/beam-sdks-java-core/2.6.0/beam-sdks-java-core-2.6.0.jar!/org/apache/beam/sdk/io/WriteFiles.class&#10;WriteFilesR&#9;PSI&#9;JAVA://org.apache.beam.sdk.io.WriteFilesResult&#10;Auto&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/apache/beam/beam-sdks-java-core/2.6.0/beam-sdks-java-core-2.6.0.jar!/org/apache/beam/sdk/io/AutoValue_TextIO_Read.class&#10;ValueProvider&#9;PSI&#9;JAVA://org.apache.beam.sdk.options.ValueProvider&#10;DynamicFileDes&#9;PSI&#9;JAVA://org.apache.beam.sdk.io.DynamicFileDestinations&#10;TextSink&#9;PSI&#9;JAVA://org.apache.beam.sdk.io.TextSink&#10;TextIO.&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/apache/beam/beam-sdks-java-core/2.6.0/beam-sdks-java-core-2.6.0.jar!/org/apache/beam/sdk/io/TextIO.class&#10;FileBasedS&#9;PSI&#9;JAVA://org.apache.beam.sdk.io.FileBasedSink&#10;Group&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/apache/beam/beam-runners-core-java/2.6.0/beam-runners-core-java-2.6.0.jar!/org/apache/beam/runners/core/GroupAlsoByWindowViaWindowSetNewDoFn.class&#10;GroupBy&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/apache/beam/beam-sdks-java-core/2.6.0/beam-sdks-java-core-2.6.0.jar!/org/apache/beam/sdk/transforms/GroupByKey.class&#10;ReduceFnRu&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/apache/beam/beam-runners-core-java/2.6.0/beam-runners-core-java-2.6.0.jar!/org/apache/beam/runners/core/ReduceFnRunner.class&#10;GroupA&#9;FILE&#9;jar:///home/tuan/.m2/repository/org/apache/beam/beam-runners-core-java/2.6.0/beam-runners-core-java-2.6.0.jar!/org/apache/beam/runners/core/GroupAlsoByWindowViaWindowSetNewDoFn.class&#10;GroupByKey&#9;FILE&#9;jar:///Users/admin/.m2/repository/org/apache/beam/beam-sdks-java-core/2.6.0/beam-sdks-java-core-2.6.0.jar!/org/apache/beam/sdk/transforms/GroupByKey.class&#10;Conte&#9;FILE&#9;file:///Users/admin/Projects/siddhi-execution-beam/component/src/main/java/org/wso2/beam/runner/siddhi/ExecutionContext.java&#10;SiddhiD&#9;FILE&#9;file:///Users/admin/Projects/siddhi-execution-beam/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiDoFnOperator.java&#10;Main&#9;FILE&#9;file:///Users/admin/Projects/siddhi-execution-beam/component/src/main/java/org/wso2/Main.java&#10;doFn&#9;FILE&#9;file:///Users/admin/Projects/siddhi-execution-beam/component/src/main/java/org/wso2/beam/runner/siddhi/DoFnOperator.java&#10;Beam&#9;FILE&#9;file:///Users/admin/Projects/siddhi-execution-beam/component/src/main/java/org/wso2/extension/siddhi/execution/beam/streamprocessor/BeamStreamProcessor.java&#10;SiddhiA&#9;FILE&#9;file:///Users/admin/Projects/siddhi-execution-beam/component/src/main/java/org/wso2/beam/runner/siddhi/SiddhiApp.java&#10;Committe&#9;FILE&#9;file:///Users/admin/Projects/siddhi-execution-beam/component/src/main/java/org/wso2/beam/runner/siddhi/CommittedBundle.java" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545369503544" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1545386558446" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/streamprocessor" />
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode.Java" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/component/src/main/java" />
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/outputs" />
     </key>
     <key name="CopyClassDialog.RECENTS_KEY">
       <recent name="org.wso2" />
       <recent name="org.wso2.extension.siddhi.execution.beam.streamprocessor" />
       <recent name="org.wso2.beam.runner.siddhi" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/outputs" />
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/component/src/test/resources/files/parDo" />
+      <recent name="$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/component/src/main/java" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -505,40 +487,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="TestNG.WindowingTestCase">
-    <configuration name="FlattenWithWindowTestCase" type="TestNG" factoryName="TestNG" temporary="true" nameIsGenerated="true">
-      <module name="siddhi-execution-beam" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.wso2.extension.siddhi.execution.beam.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.wso2.extension.siddhi.execution.beam" />
-      <option name="MAIN_CLASS_NAME" value="org.wso2.extension.siddhi.execution.beam.FlattenWithWindowTestCase" />
-      <properties />
-      <listeners />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="GroupingByKeyTestCase" type="TestNG" factoryName="TestNG" temporary="true" nameIsGenerated="true">
-      <module name="siddhi-execution-beam" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="org.wso2.extension.siddhi.execution.beam.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <option name="PACKAGE_NAME" value="org.wso2.extension.siddhi.execution.beam" />
-      <option name="MAIN_CLASS_NAME" value="org.wso2.extension.siddhi.execution.beam.GroupingByKeyTestCase" />
-      <properties />
-      <listeners />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="MultiPardoTestCase" type="TestNG" factoryName="TestNG" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="TestNG.MultiPardoTestCase.multiPardoTest">
+    <configuration name="MultiPardoTestCase.multiPardoTest" type="TestNG" factoryName="TestNG" temporary="true" nameIsGenerated="true">
       <module name="siddhi-execution-beam" />
       <extension name="coverage">
         <pattern>
@@ -548,6 +498,8 @@
       </extension>
       <option name="PACKAGE_NAME" value="org.wso2.extension.siddhi.execution.beam" />
       <option name="MAIN_CLASS_NAME" value="org.wso2.extension.siddhi.execution.beam.MultiPardoTestCase" />
+      <option name="METHOD_NAME" value="multiPardoTest" />
+      <option name="TEST_OBJECT" value="METHOD" />
       <properties />
       <listeners />
       <method v="2">
@@ -564,6 +516,40 @@
       </extension>
       <option name="PACKAGE_NAME" value="org.wso2.extension.siddhi.execution.beam" />
       <option name="MAIN_CLASS_NAME" value="org.wso2.extension.siddhi.execution.beam.PardoLetterCountTestCase" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SampleBeamTestCase" type="TestNG" factoryName="TestNG" temporary="true" nameIsGenerated="true">
+      <module name="siddhi-execution-beam" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.wso2.extension.siddhi.execution.beam.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.wso2.extension.siddhi.execution.beam" />
+      <option name="MAIN_CLASS_NAME" value="org.wso2.extension.siddhi.execution.beam.SampleBeamTestCase" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="SampleBeamTestCase.BeamTestCase" type="TestNG" factoryName="TestNG" temporary="true" nameIsGenerated="true">
+      <module name="siddhi-execution-beam" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="org.wso2.extension.siddhi.execution.beam.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <option name="PACKAGE_NAME" value="org.wso2.extension.siddhi.execution.beam" />
+      <option name="MAIN_CLASS_NAME" value="org.wso2.extension.siddhi.execution.beam.SampleBeamTestCase" />
+      <option name="METHOD_NAME" value="BeamTestCase" />
+      <option name="TEST_OBJECT" value="METHOD" />
       <properties />
       <listeners />
       <method v="2">
@@ -587,19 +573,19 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="TestNG.FlattenWithWindowTestCase" />
-      <item itemvalue="TestNG.MultiPardoTestCase" />
-      <item itemvalue="TestNG.GroupingByKeyTestCase" />
       <item itemvalue="TestNG.PardoLetterCountTestCase" />
       <item itemvalue="TestNG.WindowingTestCase" />
+      <item itemvalue="TestNG.SampleBeamTestCase.BeamTestCase" />
+      <item itemvalue="TestNG.SampleBeamTestCase" />
+      <item itemvalue="TestNG.MultiPardoTestCase.multiPardoTest" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="TestNG.MultiPardoTestCase.multiPardoTest" />
+        <item itemvalue="TestNG.SampleBeamTestCase" />
+        <item itemvalue="TestNG.SampleBeamTestCase.BeamTestCase" />
         <item itemvalue="TestNG.WindowingTestCase" />
         <item itemvalue="TestNG.PardoLetterCountTestCase" />
-        <item itemvalue="TestNG.MultiPardoTestCase" />
-        <item itemvalue="TestNG.GroupingByKeyTestCase" />
-        <item itemvalue="TestNG.FlattenWithWindowTestCase" />
       </list>
     </recent_temporary>
   </component>
@@ -617,35 +603,35 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="FlattenWithWindowTestCase - 2018.12.20 at 17h 03m 59s.xml">
-      <configuration name="FlattenWithWindowTestCase" configurationId="TestNG" />
-    </history-entry>
-    <history-entry file="FlattenWithWindowTestCase - 2018.12.20 at 17h 04m 20s.xml">
-      <configuration name="FlattenWithWindowTestCase" configurationId="TestNG" />
-    </history-entry>
-    <history-entry file="FlattenWithWindowTestCase - 2018.12.20 at 17h 12m 57s.xml">
-      <configuration name="FlattenWithWindowTestCase" configurationId="TestNG" />
-    </history-entry>
-    <history-entry file="FlattenWithWindowTestCase - 2018.12.20 at 20h 10m 21s.xml">
-      <configuration name="FlattenWithWindowTestCase" configurationId="TestNG" />
-    </history-entry>
-    <history-entry file="FlattenWithoutWindowTestCase - 2018.12.21 at 10h 46m 24s.xml">
-      <configuration name="FlattenWithoutWindowTestCase" configurationId="TestNG" />
-    </history-entry>
-    <history-entry file="FlattenWithWindowTestCase - 2018.12.21 at 10h 46m 43s.xml">
-      <configuration name="FlattenWithWindowTestCase" configurationId="TestNG" />
-    </history-entry>
-    <history-entry file="GroupingByKeyTestCase - 2018.12.21 at 10h 47m 10s.xml">
-      <configuration name="GroupingByKeyTestCase" configurationId="TestNG" />
-    </history-entry>
-    <history-entry file="MultiPardoTestCase - 2018.12.21 at 10h 47m 42s.xml">
-      <configuration name="MultiPardoTestCase" configurationId="TestNG" />
-    </history-entry>
-    <history-entry file="PardoLetterCountTestCase - 2018.12.21 at 10h 47m 57s.xml">
-      <configuration name="PardoLetterCountTestCase" configurationId="TestNG" />
-    </history-entry>
     <history-entry file="WindowingTestCase - 2018.12.21 at 10h 48m 22s.xml">
       <configuration name="WindowingTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="SampleBeamTestCase_BeamTestCase - 2018.12.21 at 11h 57m 32s.xml">
+      <configuration name="SampleBeamTestCase.BeamTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="SampleBeamTestCase_BeamTestCase - 2018.12.21 at 12h 00m 05s.xml">
+      <configuration name="SampleBeamTestCase.BeamTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="SampleBeamTestCase_BeamTestCase - 2018.12.21 at 12h 02m 44s.xml">
+      <configuration name="SampleBeamTestCase.BeamTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="SampleBeamTestCase_BeamTestCase - 2018.12.21 at 12h 05m 55s.xml">
+      <configuration name="SampleBeamTestCase.BeamTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="SampleBeamTestCase_BeamTestCase - 2018.12.21 at 12h 06m 24s.xml">
+      <configuration name="SampleBeamTestCase.BeamTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="SampleBeamTestCase_BeamTestCase - 2018.12.21 at 12h 11m 36s.xml">
+      <configuration name="SampleBeamTestCase.BeamTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="SampleBeamTestCase - 2018.12.21 at 12h 19m 16s.xml">
+      <configuration name="SampleBeamTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="SampleBeamTestCase - 2018.12.21 at 12h 20m 07s.xml">
+      <configuration name="SampleBeamTestCase" configurationId="TestNG" />
+    </history-entry>
+    <history-entry file="MultiPardoTestCase_multiPardoTest - 2018.12.21 at 14h 47m 16s.xml">
+      <configuration name="MultiPardoTestCase.multiPardoTest" configurationId="TestNG" />
     </history-entry>
   </component>
   <component name="TodoView">
@@ -661,7 +647,7 @@
     <frame x="65" y="-4" width="1855" height="1084" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.23383084" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.23383084" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -672,7 +658,7 @@
       <window_info anchor="bottom" id="CheckStyle" order="0" weight="0.38238454" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Find" order="2" weight="0.42964554" />
-      <window_info anchor="bottom" x="0" y="44" width="1680" height="948" id="Run" order="3" weight="0.4253491" />
+      <window_info anchor="bottom" x="0" y="44" width="1680" height="948" id="Run" order="3" weight="0.6251343" />
       <window_info anchor="bottom" x="0" y="44" width="1680" height="948" id="Debug" order="4" weight="0.5929108" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
@@ -889,58 +875,6 @@
     </expressions>
   </component>
   <component name="editorHistoryManager">
-    <entry file="jar://$MAVEN_REPOSITORY$/org/wso2/siddhi/siddhi-core/4.2.40/siddhi-core-4.2.40-sources.jar!/org/wso2/siddhi/core/query/processor/stream/AbstractStreamProcessor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-8">
-          <caret line="58" column="18" selection-start-line="58" selection-start-column="18" selection-end-line="58" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/com/google/common/collect/Multimap.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="209">
-          <caret line="40" column="18" selection-start-line="40" selection-start-column="18" selection-end-line="40" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/com/google/common/collect/ListMultimap.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="14" column="49" lean-forward="true" selection-start-line="14" selection-start-column="49" selection-end-line="14" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/apache/beam/beam-sdks-java-core/2.8.0/beam-sdks-java-core-2.8.0-sources.jar!/org/apache/beam/sdk/io/Read.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="282">
-          <caret line="84" column="22" selection-start-line="84" selection-start-column="22" selection-end-line="84" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar://$MAVEN_REPOSITORY$/org/apache/beam/beam-sdks-java-core/2.8.0/beam-sdks-java-core-2.8.0-sources.jar!/org/apache/beam/sdk/runners/TransformHierarchy.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3465">
-          <caret line="563" column="34" lean-forward="true" selection-start-line="563" selection-start-column="34" selection-end-line="563" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/component/src/main/java/org/wso2/beam/runner/siddhi/GraphVisitor.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="975">
-          <caret line="81" column="25" selection-start-line="81" selection-start-column="25" selection-end-line="81" selection-end-column="25" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/lang/reflect/AccessibleObject.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="300">
-          <caret line="56" column="13" selection-start-line="56" selection-start-column="13" selection-end-line="56" selection-end-column="13" />
-        </state>
-      </provider>
-    </entry>
     <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/lang/reflect/Executable.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
@@ -1252,13 +1186,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/component/pom.xml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="216">
-          <caret line="121" column="98" lean-forward="true" selection-start-line="121" selection-start-column="98" selection-end-line="121" selection-end-column="98" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="345">
@@ -1266,17 +1193,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/FlattenWithoutWindowTestCase.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="930">
-          <caret line="96" column="46" selection-start-line="96" selection-start-column="46" selection-end-line="96" selection-end-column="46" />
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/component/target/surefire-reports/TestSuite.txt">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/FlattenWithWindowTestCase.java">
+    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/PardoLetterCountTestCase.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="57" column="9" selection-start-line="57" selection-start-column="9" selection-end-line="57" selection-end-column="9" />
+        <state relative-caret-position="90">
+          <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
         </state>
       </provider>
     </entry>
@@ -1287,27 +1210,82 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/FlattenWithWindowTestCase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="288">
+          <caret line="57" column="9" selection-start-line="57" selection-start-column="9" selection-end-line="57" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/FlattenWithoutWindowTestCase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="930">
+          <caret line="96" column="46" selection-start-line="96" selection-start-column="46" selection-end-line="96" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/WindowingTestCase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="77" column="73" selection-start-line="77" selection-start-column="73" selection-end-line="77" selection-end-column="73" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/component/target/coverage-reports/index.html">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/component/pom.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1815">
+          <caret line="121" column="98" lean-forward="true" selection-start-line="121" selection-start-column="98" selection-end-line="121" selection-end-column="98" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/component/src/test/resources/files/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="6" selection-start-line="1" selection-start-column="6" selection-end-line="1" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/MultiPardoTestCase.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="475">
-          <caret line="48" column="57" lean-forward="true" selection-start-line="48" selection-start-column="57" selection-end-line="48" selection-end-column="57" />
+        <state relative-caret-position="210">
+          <caret line="42" column="9" lean-forward="true" selection-start-line="42" selection-start-column="9" selection-end-line="42" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/PardoLetterCountTestCase.java">
+    <entry file="file://$PROJECT_DIR$/siddhi-beam.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="30" column="13" selection-start-line="30" selection-start-column="13" selection-end-line="30" selection-end-column="13" />
+        <state relative-caret-position="30">
+          <caret line="2" selection-start-line="2" selection-end-line="2" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/WindowingTestCase.java">
+    <entry file="jar:///usr/lib/jvm/java-8-oracle/src.zip!/java/lang/ClassLoader.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-144">
-          <caret line="41" column="31" selection-start-line="41" selection-start-column="31" selection-end-line="41" selection-end-column="31" />
+        <state relative-caret-position="528">
+          <caret line="1090" column="22" selection-start-line="1090" selection-start-column="22" selection-end-line="1090" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/component/src/test/resources/files/parDo/sample.txt">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="16" selection-start-line="1" selection-start-column="16" selection-end-line="1" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/component/src/test/java/org/wso2/extension/siddhi/execution/beam/SampleBeamTestCase.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="711">
+          <caret line="102" column="102" lean-forward="true" selection-start-line="102" selection-start-column="102" selection-end-line="102" selection-end-column="102" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
