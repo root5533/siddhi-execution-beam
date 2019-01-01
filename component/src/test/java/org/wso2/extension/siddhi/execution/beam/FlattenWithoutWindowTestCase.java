@@ -31,19 +31,47 @@ import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionList;
+import org.apache.commons.io.FileUtils;
+import org.testng.AssertJUnit;
+import org.testng.TestException;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import org.wso2.beam.runner.siddhi.SiddhiPipelineOptions;
 import org.wso2.beam.runner.siddhi.SiddhiRunner;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 
 public class FlattenWithoutWindowTestCase {
 
+    private String rootPath, source, sink;
+
+    @BeforeClass
+    public void init() {
+        ClassLoader classLoader = MultiParDoTestCase.class.getClassLoader();
+        rootPath = classLoader.getResource("files").getFile();
+        source = rootPath + "/inputs/sample.csv";
+        sink = rootPath + "/sink/flattenResult.txt";
+    }
+
+    @AfterMethod
+    public void doAfterMethod() {
+        try {
+            FileUtils.deleteDirectory(new File(rootPath + "/sink"));
+        } catch (IOException e) {
+            throw new TestException("Failed to delete files in due to " + e.getMessage(), e);
+        }
+    }
+
     private static class CheckElement extends DoFn<String, KV<String, String[]>> {
 
-        String[] regions = {"Europe", "Asia", "Middle East and North Africa",
-                "Central America", "Australia and Oceania", "Sub-Saharan Africa"};
+        String[] regions = {"Asia", "Central America"};
 
         @ProcessElement
         public void processElement(@Element String element, OutputReceiver<KV<String, String[]>> out) {
@@ -64,9 +92,9 @@ public class FlattenWithoutWindowTestCase {
             float totalProfit = 0f;
             while (iter.hasNext()) {
                 String[] details = iter.next();
-                totalProfit += Float.parseFloat(details[details.length - 1]) / 1000000;
+                totalProfit += Float.parseFloat(details[details.length - 1]);
             }
-            return input.getKey().trim() + " region profits : $ " + totalProfit + " Million";
+            return input.getKey().trim() + ":" + totalProfit;
         }
 
     }
@@ -80,28 +108,53 @@ public class FlattenWithoutWindowTestCase {
     }
 
     @Test
-    public static void flattenWithoutWindowTest() {
+    public void flattenWithoutWindowTest() throws InterruptedException {
         SiddhiPipelineOptions options = PipelineOptionsFactory.as(SiddhiPipelineOptions.class);
         options.setRunner(SiddhiRunner.class);
-        runCSVDemo(options);
+        runFlattenWithoutWindow(options);
+        Thread.sleep(1000);
+        File sinkFile = new File(sink);
+        try {
+            if (sinkFile.isFile()) {
+                BufferedReader reader = new BufferedReader(new FileReader(sinkFile));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] continents = line.split(":");
+                    switch(continents[0]) {
+                        case "Central America":
+                            AssertJUnit.assertEquals(150000.0f, Float.valueOf(continents[1]));
+                            break;
+                        case "Asia":
+                            AssertJUnit.assertEquals(480000.0f, Float.valueOf(continents[1]));
+                            break;
+                        default:
+                            AssertJUnit.fail("Invalid value in sink file " + Arrays.toString(continents));
+                    }
+                }
+            } else {
+                AssertJUnit.fail(sink + " is not a directory");
+            }
+        } catch (FileNotFoundException e) {
+            AssertJUnit.fail(e.getMessage());
+        } catch (IOException e) {
+            AssertJUnit.fail("Error occurred during reading the file '" + sinkFile.getAbsolutePath());
+        }
     }
 
-    private static void runCSVDemo(SiddhiPipelineOptions options) {
-
+    private void runFlattenWithoutWindow(SiddhiPipelineOptions options) {
         Pipeline pipe = Pipeline.create(options);
-        PCollection<KV<String, String[]>> collectionOne = pipe.apply("Readfile", TextIO.read()
-                .from("/home/tuan/WSO2/inputs/input-small.csv"))
+        PCollection<KV<String, String[]>> collectionOne = pipe.apply(TextIO.read()
+                .from(source))
                 .apply(new CSVFilterRegion());
-        PCollection<KV<String, String[]>> collectionTwo = pipe.apply("Readfile", TextIO.read()
-                .from("/home/tuan/WSO2/inputs/test-input.csv"))
+        PCollection<KV<String, String[]>> collectionTwo = pipe.apply(TextIO.read()
+                .from(source))
                 .apply(new CSVFilterRegion());
         PCollectionList<KV<String, String[]>> collectionList = PCollectionList
                 .of(collectionOne).and(collectionTwo);
         PCollection<KV<String, String[]>> merged = collectionList
                 .apply(Flatten.pCollections());
         merged.apply(GroupByKey.create()).apply(MapElements.via(new FindKeyValueFn()))
-            .apply(TextIO.write().to(options.getOutput() + "FlattenWithoutWindow"));
-
+            .apply(TextIO.write().to(sink));
         pipe.run();
     }
 }

@@ -31,8 +31,8 @@ public class MultiParDoTestCase {
     public void init() {
         ClassLoader classLoader = MultiParDoTestCase.class.getClassLoader();
         rootPath = classLoader.getResource("files").getFile();
-        source = rootPath + "/parDo/sample.txt";
-        sink = rootPath + "/sink/resultSample.txt";
+        source = rootPath + "/inputs/sample.txt";
+        sink = rootPath + "/sink/multiParDoResult.txt";
     }
 
     @AfterMethod
