@@ -48,13 +48,18 @@ public class ExecutionContext {
         return context;
     }
 
-    void addRootBundle(CommittedBundle bundle) {
+    public void addRootBundle(CommittedBundle bundle) {
         this.bundles.put(bundle.getPCollection(), bundle);
         this.rootBundles.put(bundle.getPCollection(), bundle);
     }
 
     Collection<CommittedBundle> getRootBundles() {
         return rootBundles.values();
+    }
+
+    public void clearAllBundles() {
+        this.bundles.clear();
+        this.rootBundles.clear();
     }
 
     DirectGraph getGraph() {

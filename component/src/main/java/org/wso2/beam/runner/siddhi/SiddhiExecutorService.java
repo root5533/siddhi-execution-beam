@@ -69,11 +69,12 @@ public class SiddhiExecutorService {
                     source.run(executionRuntime.getSiddhiRuntime().getInputHandler(inputStream));
                 }
             }
+            context.clearAllBundles();
         } catch (IOException exception) {
             //TODO more descriptive errors, print stacktrace
             log.error("IOException ", exception.getMessage());
         } catch (Exception exception) {
-            log.error("Exception ", exception.getMessage());
+            log.error("Unable to execute the service ", exception.getMessage(), exception);
         }
     }
 
