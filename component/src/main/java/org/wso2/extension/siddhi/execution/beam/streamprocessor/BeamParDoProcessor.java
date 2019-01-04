@@ -21,10 +21,12 @@ package org.wso2.extension.siddhi.execution.beam.streamprocessor;
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.util.WindowedValue;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.TupleTag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.beam.runner.siddhi.ExecutionContext;
 import org.wso2.beam.runner.siddhi.SiddhiDoFnOperator;
+import org.wso2.beam.runner.siddhi.SiddhiPartitionDoFnOperator;
 import org.wso2.siddhi.annotation.Example;
 import org.wso2.siddhi.annotation.Extension;
 import org.wso2.siddhi.annotation.Parameter;
@@ -37,6 +39,7 @@ import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ConstantExpressionExecutor;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -100,34 +103,53 @@ public class BeamParDoProcessor extends StreamProcessor {
                                    SiddhiAppContext siddhiAppContext) {
 
         ArrayList<Attribute> attributes = new ArrayList<Attribute>();
+        boolean isTagAvailable;
 
-        if (attributeExpressionLength != 2) {
-            throw new SiddhiAppCreationException("Only 2 parameters can be specified for BeamExecutionProcessor");
+        if (attributeExpressionLength != 3) {
+            if (attributeExpressionLength != 2) {
+                throw new SiddhiAppCreationException(
+                        "Invalid parameter count. Minimum of 2 values are required."
+                );
+            } else {
+                isTagAvailable = false;
+            }
+        } else {
+            isTagAvailable = true;
         }
 
-        if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
+        if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT
+                && attributeExpressionExecutors[0] instanceof VariableExpressionExecutor) {
             this.eventExecutor = attributeExpressionExecutors[0];
         } else {
-            throw new SiddhiAppCreationException("First parameter must be of type Object");
+            throw new SiddhiAppCreationException("First parameter must be a variable object type");
         }
 
         //TODO check instance type(variable or constant)
-        if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.STRING) {
-            /*
-             * Get beam transform here and create DoFnOperator
-             */
-            try {
+        /*
+         * Get beam transform here and create DoFnOperator
+         */
+        try {
+            if (attributeExpressionExecutors[1].getReturnType() == Attribute.Type.STRING
+                    && attributeExpressionExecutors[1] instanceof ConstantExpressionExecutor) {
                 String beamTransform = ((ConstantExpressionExecutor) attributeExpressionExecutors[1])
                         .getValue().toString();
                 ExecutionContext context = ExecutionContext.getInstance();
                 AppliedPTransform transform = context.getTransfromFromName(beamTransform);
                 PCollection collection = context.getCollectionFromName(beamTransform);
-                this.operator = new SiddhiDoFnOperator(transform, collection);
-            } catch (Exception e) {
-                log.error(e.getMessage());
+                if (isTagAvailable) {
+                    String tagKey = attributeExpressionExecutors[2].execute(null).toString();
+                    TupleTag tag = context.getTupleTagFromName(tagKey);
+                    this.operator = new SiddhiPartitionDoFnOperator(transform, collection, tag);
+                } else {
+                    this.operator = new SiddhiDoFnOperator(transform, collection);
+                }
+                this.operator.start();
+            } else {
+                throw new SiddhiAppCreationException("Second parameter must be a constant String");
             }
-        } else {
-            throw new SiddhiAppCreationException("Second parameter must be of type String");
+        } catch (Exception e) {
+            log.error("Could not execute pardo transform", e.getMessage(), e);
+            throw new SiddhiAppCreationException(e);
         }
 
         return attributes;

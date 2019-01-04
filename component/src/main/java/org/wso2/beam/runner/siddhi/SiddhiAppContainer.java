@@ -28,6 +28,7 @@ import org.apache.beam.sdk.transforms.windowing.FixedWindows;
 import org.apache.beam.sdk.transforms.windowing.GlobalWindows;
 import org.apache.beam.sdk.transforms.windowing.Window;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.TupleTag;
 import org.joda.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,9 @@ public class SiddhiAppContainer {
     private List<String> queryDefinitions = new LinkedList<>();
     private Map<String, AppliedPTransform> transformsMap = new HashMap<>();
     private Map<String, PCollection> collectionsMap = new HashMap<>();
+    private Map<String, TupleTag> additionalOutputTags = new HashMap<>();
     private DirectGraph graph;
+    private int multiSinkcount = 1;
 //    private PCollection finalCollection;
 //    private String writeStreamName = "writeStream";
 
@@ -113,7 +116,8 @@ public class SiddhiAppContainer {
             if (transform.getOutputs().isEmpty()) {
                 if (transform.getTransform() instanceof TextIO.Write) {
                     String sinkType = "text";
-                    String sinkStreamName = "textSinkStream";
+                    String sinkStreamName = "textSinkStream"
+                            + (multiSinkcount == 1 ? "" : String.valueOf(multiSinkcount));
                     try {
                         TextIO.TypedWrite textio = ((TextIO.Write) transform.getTransform()).withOutputFilenames();
                         Class<?> cls = textio.getClass();
@@ -131,9 +135,10 @@ public class SiddhiAppContainer {
                     }
                 }
             } else {
-                for (Object pValue: transform.getOutputs().values()) {
-                    PCollection collection = (PCollection) pValue;
-                    for (AppliedPTransform nextTransform: this.graph.getPerElementConsumers(collection)) {
+                transform.getOutputs().forEach((tag, collection) -> {
+                    PCollection outputCollection = (PCollection) collection;
+                    TupleTag outputTag = (TupleTag) tag;
+                    for (AppliedPTransform nextTransform: this.graph.getPerElementConsumers(outputCollection)) {
                         if (SiddhiAppContainer.compatibleTransform(nextTransform)) {
                             String outputStreamName = SiddhiAppContainer
                                     .generateTransformName(nextTransform.getFullName()) + "Stream";
@@ -143,7 +148,16 @@ public class SiddhiAppContainer {
                                         .append(streamName)
                                         .append("#beam:pardo(event, \"")
                                         .append(SiddhiAppContainer.generateTransformName(transform.getFullName()))
-                                        .append("\") select event insert into ")
+                                        .append("\"");
+                                if (transform.getOutputs().size() > 1) {
+                                    additionalOutputTags.put(outputCollection.getName(), outputTag);
+                                    query.append(", \"")
+                                            .append(outputCollection.getName())
+                                            .append("\") ");
+                                } else {
+                                    query.append(") ");
+                                }
+                                query.append("select event insert into ")
                                         .append(outputStreamName)
                                         .append(";");
                             } else if (transform.getTransform() instanceof GroupByKey) {
@@ -188,14 +202,14 @@ public class SiddhiAppContainer {
                                         .append(";");
                             }
                             this.queryDefinitions.add(query.toString());
-                            generateSiddhiQueryForTransform(nextTransform, collection);
+                            generateSiddhiQueryForTransform(nextTransform, outputCollection);
                         } else {
                             log.error("Siddhi does not support " +
                                     nextTransform.getTransform().toString() + " at the moment");
                             return;
                         }
                     }
-                }
+                });
             }
         }
     }
@@ -247,6 +261,7 @@ public class SiddhiAppContainer {
                     .append(sinkStreamName)
                     .append(" (value string);");
         }
+        this.multiSinkcount += 1;
         return sinkStream.toString();
     }
 
@@ -264,6 +279,10 @@ public class SiddhiAppContainer {
 
     Map<String, PCollection> getCollectionsMap() {
         return this.collectionsMap;
+    }
+
+    Map<String, TupleTag> getAdditionalOutputTags() {
+        return this.additionalOutputTags;
     }
 
 //    public PCollection getFinalCollection() {

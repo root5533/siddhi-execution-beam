@@ -19,7 +19,6 @@
 package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.runners.core.DoFnRunner;
-import org.apache.beam.runners.core.DoFnRunners.OutputManager;
 import org.apache.beam.runners.core.SideInputReader;
 import org.apache.beam.runners.core.SimpleDoFnRunner;
 import org.apache.beam.runners.core.StateInternals;
@@ -56,20 +55,20 @@ import java.util.stream.Collectors;
 public class SiddhiDoFnOperator
         <InputT extends PInput, OutputT extends POutput, TransformT extends PTransform<InputT, OutputT>> {
 
-    private final AppliedPTransform<InputT, OutputT, TransformT> transform;
-    private DoFnRunner<InputT, OutputT> delegate;
-    private PCollection<InputT> collection;
-    private ComplexEventChunk<StreamEvent> complexEventChunk;
-    protected PipelineOptions options;
-    private SideInputReader sideInputReader;
-    private OutputManager outputManager;
-    private TupleTag mainOutputTag;
-    private List<TupleTag<?>> additionalOutputTags;
-    private StepContext stepContext;
-    private Coder<InputT> inputCoder;
-    private Map<TupleTag<?>, Coder<?>> outputCoders;
-    private WindowingStrategy windowingStrategy;
-    private DoFn<InputT, OutputT> fn;
+    public final AppliedPTransform<InputT, OutputT, TransformT> transform;
+    public DoFnRunner<InputT, OutputT> delegate;
+    public PCollection<InputT> collection;
+//    public ComplexEventChunk<StreamEvent> complexEventChunk;
+    public PipelineOptions options;
+    public SideInputReader sideInputReader;
+    public EventChunkOutputManager outputManager;
+    public TupleTag mainOutputTag;
+    public List<TupleTag<?>> additionalOutputTags;
+    public StepContext stepContext;
+    public Coder<InputT> inputCoder;
+    public Map<TupleTag<?>, Coder<?>> outputCoders;
+    public WindowingStrategy windowingStrategy;
+    public DoFn<InputT, OutputT> fn;
 
     public SiddhiDoFnOperator(
             AppliedPTransform<InputT, OutputT, TransformT> transform, PCollection<InputT> collection) throws Exception {
@@ -78,7 +77,6 @@ public class SiddhiDoFnOperator
         this.options = this.transform.getPipeline().getOptions();
         this.sideInputReader = SiddhiDoFnOperator.LocalSideInputReader
                 .create(ParDoTranslation.getSideInputs(this.transform));
-        this.outputManager = new SiddhiDoFnOperator.BundleOutputManager();
         this.mainOutputTag = ParDoTranslation.getMainOutputTag(this.transform);
         this.additionalOutputTags = ParDoTranslation.getAdditionalOutputTags(this.transform).getAll();
         this.stepContext = SiddhiDoFnOperator.LocalStepContext.create();
@@ -90,13 +88,13 @@ public class SiddhiDoFnOperator
         }));
         this.windowingStrategy = this.collection.getWindowingStrategy();
         this.fn = this.getDoFn();
-        this.delegate = new SimpleDoFnRunner<InputT, OutputT>(options, fn, sideInputReader, outputManager,
-                mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);
     }
 
     public void start() {
+        this.outputManager = new EventChunkOutputManager(new ComplexEventChunk<>(false), this.mainOutputTag);
+        this.delegate = new SimpleDoFnRunner<InputT, OutputT>(options, fn, sideInputReader, outputManager,
+                mainOutputTag, additionalOutputTags, stepContext, inputCoder, outputCoders, windowingStrategy);
         this.delegate.startBundle();
-        this.complexEventChunk = new ComplexEventChunk<>(false);
     }
 
     public void finish() {
@@ -112,20 +110,7 @@ public class SiddhiDoFnOperator
     }
 
     public ComplexEventChunk<StreamEvent> getOutputChunk() {
-        return this.complexEventChunk;
-    }
-
-    /**
-     *
-     */
-    protected class BundleOutputManager implements OutputManager {
-
-        @Override
-        public <T> void output(TupleTag<T> tag, WindowedValue<T> output) {
-            StreamEvent streamEvent = new StreamEvent(0, 0, 1);
-            streamEvent.setOutputData(output, 0);
-            SiddhiDoFnOperator.this.complexEventChunk.add(streamEvent);
-        }
+        return this.outputManager.getOutputChunk();
     }
 
     /**

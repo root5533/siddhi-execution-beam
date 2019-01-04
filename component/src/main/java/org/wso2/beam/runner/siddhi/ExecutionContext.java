@@ -20,6 +20,8 @@ package org.wso2.beam.runner.siddhi;
 
 import org.apache.beam.sdk.runners.AppliedPTransform;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.TupleTag;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +39,7 @@ public class ExecutionContext {
     private final Map<PCollection, CommittedBundle> rootBundles = new HashMap<>();
     private Map<String, AppliedPTransform> transformsMap = new HashMap<>();
     private Map<String, PCollection> collectionsMap = new HashMap<>();
+    private Map<String, TupleTag> additionalOutputTags = new HashMap<>();
 
     private ExecutionContext() {}
 
@@ -74,12 +77,20 @@ public class ExecutionContext {
         this.collectionsMap = map;
     }
 
+    void setAdditionalOutputTags(Map<String, TupleTag> map) {
+        this.additionalOutputTags = map;
+    }
+
     public AppliedPTransform getTransfromFromName(String key) {
         return this.transformsMap.get(key);
     }
 
     public PCollection getCollectionFromName(String key) {
         return this.collectionsMap.get(key);
+    }
+
+    public TupleTag getTupleTagFromName(String key) {
+        return this.additionalOutputTags.get(key);
     }
 
 }

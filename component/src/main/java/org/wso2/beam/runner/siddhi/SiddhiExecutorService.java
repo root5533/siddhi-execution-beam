@@ -54,6 +54,7 @@ public class SiddhiExecutorService {
             executionRuntime.createSiddhiQuery();
             context.setTransformsMap(executionRuntime.getTransformsMap());
             context.setCollectionsMap(executionRuntime.getCollectionsMap());
+            context.setAdditionalOutputTags(executionRuntime.getAdditionalOutputTags());
             executionRuntime.createSiddhiRuntime();
 //            executionRuntime.setBundle(new CommittedBundle(null));
 
