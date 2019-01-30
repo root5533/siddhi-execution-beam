@@ -37,6 +37,8 @@ import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamParDoProcess
 import org.wso2.extension.siddhi.execution.beam.streamprocessor.BeamSinkProcessor;
 import org.wso2.siddhi.core.SiddhiAppRuntime;
 import org.wso2.siddhi.core.SiddhiManager;
+import org.wso2.siddhi.query.compiler.exception.SiddhiParserException;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -80,19 +82,23 @@ public class SiddhiAppContainer {
         }
     }
 
-    public void createSiddhiRuntime() {
-        log.info("Creating Siddhi Runtime");
-        SiddhiManager siddhiManager = new SiddhiManager();
-        StringBuilder siddhiApp = new StringBuilder();
-        this.streamDefinitions.forEach(siddhiApp::append);
-        this.queryDefinitions.forEach(siddhiApp::append);
-        log.debug(siddhiApp.toString());
-        siddhiManager.setExtension("beam:pardo", BeamParDoProcessor.class);
-        siddhiManager.setExtension("beam:groupbykey", BeamGroupByKeyProcessor.class);
-        siddhiManager.setExtension("beam:sink", BeamSinkProcessor.class);
-        //TODO handle siddi exception here ???
-        this.runtime = siddhiManager.createSiddhiAppRuntime(siddhiApp.toString());
-        this.runtime.start();
+    public void createSiddhiRuntime() throws SiddhiParserException {
+        try {
+            log.info("Creating Siddhi Runtime");
+            SiddhiManager siddhiManager = new SiddhiManager();
+            StringBuilder siddhiApp = new StringBuilder();
+            this.streamDefinitions.forEach(siddhiApp::append);
+            this.queryDefinitions.forEach(siddhiApp::append);
+            log.debug(siddhiApp.toString());
+            siddhiManager.setExtension("beam:pardo", BeamParDoProcessor.class);
+            siddhiManager.setExtension("beam:groupbykey", BeamGroupByKeyProcessor.class);
+            siddhiManager.setExtension("beam:sink", BeamSinkProcessor.class);
+            this.runtime = siddhiManager.createSiddhiAppRuntime(siddhiApp.toString());
+            this.runtime.start();
+        } catch (SiddhiParserException e) {
+            log.error("There is an error in your SiddhiQL", e.getMessage(), e);
+            throw e;
+        }
     }
 
     private void generateSiddhiQueryForTransform(AppliedPTransform transform, PCollection keyCollection) {
@@ -128,10 +134,10 @@ public class SiddhiAppContainer {
                         String filePath = provider.get().toString();
                         this.queryDefinitions.add(generateSinkQuery(sinkType, streamName, sinkStreamName));
                         this.streamDefinitions.add(generateSinkStream(sinkType, sinkStreamName, filePath));
-                    } catch (NoSuchMethodException exception) {
-                        log.error(exception.getMessage());
+                    } catch (NoSuchMethodException | SecurityException exception) {
+                        log.error(exception.getMessage(), exception);
                     } catch (Exception exception) {
-                        log.error(exception.getMessage());
+                        log.error(exception.getMessage(), exception);
                     }
                 }
             } else {

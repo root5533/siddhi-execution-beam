@@ -72,8 +72,9 @@ public class SiddhiExecutorService {
             }
             context.clearAllBundles();
         } catch (IOException exception) {
-            //TODO more descriptive errors, print stacktrace
-            log.error("IOException ", exception.getMessage());
+            log.error("Invalid source file destination ", exception.getMessage(), exception);
+        } catch (InterruptedException exception) {
+            log.error("Unable to send events ", exception.getMessage(), exception);
         } catch (Exception exception) {
             log.error("Unable to execute the service ", exception.getMessage(), exception);
         }

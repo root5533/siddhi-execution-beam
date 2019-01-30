@@ -44,7 +44,7 @@ public class SiddhiRunner extends PipelineRunner<PipelineResult> {
     private SiddhiRunner() { }
 
     @Override
-//    TODO nned to learn to handle errors
+//    TODO better handle errors
     public PipelineResult run(Pipeline pipeline) {
         int targetParallelism = 1;
         GraphVisitor graphVisitor = new GraphVisitor();

@@ -32,6 +32,7 @@ import org.wso2.siddhi.core.event.stream.StreamEventCloner;
 import org.wso2.siddhi.core.event.stream.populater.ComplexEventPopulater;
 import org.wso2.siddhi.core.exception.SiddhiAppCreationException;
 import org.wso2.siddhi.core.executor.ExpressionExecutor;
+import org.wso2.siddhi.core.executor.VariableExpressionExecutor;
 import org.wso2.siddhi.core.query.processor.Processor;
 import org.wso2.siddhi.core.query.processor.stream.StreamProcessor;
 import org.wso2.siddhi.core.util.config.ConfigReader;
@@ -102,11 +103,11 @@ public class BeamSinkProcessor extends StreamProcessor {
         if (attributeExpressionLength != 1) {
             throw new SiddhiAppCreationException("Only 1 parameters can be specified for BeamSinkProcessor");
         } else {
-            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
+            if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT
+                && attributeExpressionExecutors[0] instanceof VariableExpressionExecutor) {
                 attributes.add(new Attribute("value", Attribute.Type.STRING));
                 this.eventExecutor = attributeExpressionExecutors[0];
             }
-
         }
 
         return attributes;

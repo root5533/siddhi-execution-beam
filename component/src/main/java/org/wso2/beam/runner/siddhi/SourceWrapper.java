@@ -60,7 +60,7 @@ public class SourceWrapper<OutputT> {
         }
     }
 
-    public void run(InputHandler inputHandler) {
+    public void run(InputHandler inputHandler) throws InterruptedException {
 
         /*
          Run the source to emit each element to DoFnOperator delegate
@@ -75,21 +75,18 @@ public class SourceWrapper<OutputT> {
                     hasData = reader.advance();
                 }
             }
-            //TODO change function
-            this.emitElements(inputHandler);
-            //TODO add exception and look into interrupted exception handling
-        } catch (InterruptedException exception) {
-            log.error("Interrupted Exception : ", exception.getMessage());
+            Event[] stream = elements.toArray(new Event[0]);
+            inputHandler.send(stream);
         } catch (IOException exception) {
-            log.error("IOException", exception.getMessage());
+            log.error("Error while reading source file ", exception.getMessage(), exception);
         }
 
     }
 
-    private void emitElements(InputHandler inputHandler) throws InterruptedException {
-        Event[] stream = elements.toArray(new Event[0]);
-        inputHandler.send(stream);
-    }
+//    private void emitElements(InputHandler inputHandler) throws InterruptedException {
+//        Event[] stream = elements.toArray(new Event[0]);
+//        inputHandler.send(stream);
+//    }
 
     private void convertToEvent(WindowedValue elem) {
         Event event = new Event();

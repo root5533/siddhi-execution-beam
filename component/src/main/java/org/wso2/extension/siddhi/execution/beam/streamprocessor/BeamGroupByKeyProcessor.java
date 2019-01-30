@@ -81,28 +81,24 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
         ComplexEventChunk<StreamEvent> complexEventChunk = new ComplexEventChunk<>(false);
         //TODO use lock instead
         //TODO check thread safety
+        Map<K, List<V>> groupByKeyMap = new HashMap<>();
         synchronized (this) {
-            //TODO rename to groupByKeyMap move outside sync
-            Map<K, List<V>> groupByKey = new HashMap<>();
             try {
                 while (streamEventChunk.hasNext()) {
                     StreamEvent event = streamEventChunk.next();
-                    //TODO rename to windowedValue
-                    WindowedValue value = (WindowedValue) this.eventExecutor.execute(event);
-                    //TODO rename to keyValue element
-                    KV element = (KV) value.getValue();
-                    if (groupByKey.containsKey(element.getKey())) {
-                        List<V> items = groupByKey.get(element.getKey());
-                        items.add((V) element.getValue());
-                        groupByKey.put((K) element.getKey(), items);
+                    WindowedValue windowedValue = (WindowedValue) this.eventExecutor.execute(event);
+                    KV keyValueElement = (KV) windowedValue.getValue();
+                    if (groupByKeyMap.containsKey(keyValueElement.getKey())) {
+                        List<V> items = groupByKeyMap.get(keyValueElement.getKey());
+                        items.add((V) keyValueElement.getValue());
+                        groupByKeyMap.put((K) keyValueElement.getKey(), items);
                     } else {
-                        //TODO use linkedlist for performance
                         List<V> item = new LinkedList<>();
-                        item.add((V) element.getValue());
-                        groupByKey.put((K) element.getKey(), item);
+                        item.add((V) keyValueElement.getValue());
+                        groupByKeyMap.put((K) keyValueElement.getKey(), item);
                     }
                 }
-                for (Map.Entry map: groupByKey.entrySet()) {
+                for (Map.Entry map: groupByKeyMap.entrySet()) {
                     K key = (K) map.getKey();
                     List<V> value = (LinkedList<V>) map.getValue();
                     KV kv = KV.of(key, value);
@@ -124,23 +120,26 @@ public class BeamGroupByKeyProcessor<K, V> extends StreamProcessor {
                                    ExpressionExecutor[] attributeExpressionExecutors, ConfigReader configReader,
                                    SiddhiAppContext siddhiAppContext) {
 
-        //TODO unnecessary array list
-        List<Attribute> attributes = new LinkedList<>();
-
         //TODO get length of attributeExpressionExecutors
+        //TODO check instance type(variable or constant)
         if (attributeExpressionLength != 1) {
-            //TODO provide details of given attribute.type
-            throw new SiddhiAppCreationException("Only one parameter can be specified for BeamGroupByKeyProcessor");
+            throw new SiddhiAppCreationException(
+                    "Only one parameter can be specified for BeamGroupByKeyProcessor but "
+                            + attributeExpressionLength
+                            + " were given"
+            );
         }
 
         if (attributeExpressionExecutors[0].getReturnType() == Attribute.Type.OBJECT) {
             this.eventExecutor = attributeExpressionExecutors[0];
         } else {
-            //TODO more details of provided attribute
-            throw new SiddhiAppCreationException("First parameter should be of type Object");
+            throw new SiddhiAppCreationException(
+                    "First parameter should be of type Object but "
+                    + attributeExpressionExecutors[0].getReturnType().toString()
+                    + " was given"
+            );
         }
-        //TODO return new
-        return attributes;
+        return new LinkedList<>();
     }
 
 

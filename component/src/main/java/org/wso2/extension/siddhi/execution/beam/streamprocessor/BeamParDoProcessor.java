@@ -123,8 +123,6 @@ public class BeamParDoProcessor extends StreamProcessor {
         } else {
             throw new SiddhiAppCreationException("First parameter must be a variable object type");
         }
-
-        //TODO check instance type(variable or constant)
         /*
          * Get beam transform here and create DoFnOperator
          */
