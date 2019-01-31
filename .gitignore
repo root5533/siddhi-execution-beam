@@ -1,6 +1,17 @@
 outputs/
-**/component/target/
 input-large.csv
 input.csv
-.idea/workspace.xml
+
+# Ignore Intellij-IDEA files
+*.iml
+*.ipr
+*.iws
+*.classpath
+*.settings
+*.project
+*.idea
+.DS_Store
+
+# Ignore target directories
 target/
+*.*~

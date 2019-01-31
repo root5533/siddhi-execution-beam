@@ -20,19 +20,14 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <groupId>org.wso2.extension.siddhi.execution.beam</groupId>
-        <artifactId>siddhi-execution-beam-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <groupId>org.wso2.siddhi.runner.beam</groupId>
+        <artifactId>siddhi-runner-beam-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <!--todo check artifact name-->
-    <artifactId>siddhi-execution-beam</artifactId>
+    <artifactId>siddhi-runner-beam</artifactId>
     <packaging>bundle</packaging>
-    <name>Siddhi execution of Beam</name>
-
-    <properties>
-        <beam.version>2.8.0</beam.version>
-    </properties>
+    <name>Siddhi Runner of Beam</name>
 
     <dependencies>
         <dependency>

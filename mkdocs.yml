@@ -1,4 +1,4 @@
-site_name: Siddhi-Execution-Beam
+site_name: Siddhi-Runner-Beam
 extra_css:
 - stylesheets/extra.css
 extra_javascript:
